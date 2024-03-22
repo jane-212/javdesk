@@ -11,6 +11,7 @@ const MARGIN: Pixels = Pixels(8.0);
 pub struct Page {
     current: i32,
     high: i32,
+    pages: Vec<PageItem>,
 }
 
 impl Page {
@@ -20,6 +21,7 @@ impl Page {
         Self {
             current: 1,
             high: 1,
+            pages: Vec::new(),
         }
     }
 
@@ -29,6 +31,8 @@ impl Page {
 
     pub fn set_high(&mut self, high: i32) {
         self.high = high;
+        self.pages.clear();
+        self.pages.append(&mut self.pages());
     }
 
     fn pages(&self) -> Vec<PageItem> {
@@ -67,8 +71,6 @@ impl Page {
 
 impl RenderOnce for Page {
     fn render(self, _cx: &mut WindowContext) -> impl IntoElement {
-        let pages = self.pages();
-
         div()
             .w(SIZE + PADDING * 2)
             .h_full()
@@ -78,13 +80,13 @@ impl RenderOnce for Page {
             .child(
                 div()
                     .w(SIZE)
-                    .h(pages.len() as f32 * (SIZE + MARGIN))
-                    .children(pages),
+                    .h(self.pages.len() as f32 * (SIZE + MARGIN))
+                    .children(self.pages),
             )
     }
 }
 
-#[derive(IntoElement)]
+#[derive(IntoElement, Clone)]
 pub enum PageItem {
     Current(i32),
     Dot,

@@ -9,14 +9,12 @@ mod state;
 use crate::views::loading::Loading;
 use crate::{db::DB, views::error::Error};
 use detail::Detail;
-use idle::Idle;
-use state::{State, StateMachine};
+pub use state::State;
+use state::StateMachine;
 
-pub struct Home;
+pub struct Like;
 
-impl Home {
-    const BASE_URL: &'static str = "https://www.javbus.com";
-
+impl Like {
     pub fn init(cx: &mut WindowContext) {
         let state = State::new(cx);
         cx.set_global(state);
@@ -29,52 +27,14 @@ impl Home {
     }
 
     fn load_page(cx: &mut ViewContext<Self>, page: i32) {
-        cx.spawn(|_view, mut cx| async move {
-            cx.update_global::<State, ()>(|state, cx| {
-                state.machine_mut().loading();
-                cx.refresh();
-            })
-            .ok();
-        })
-        .detach();
-
-        let client = cx.global::<State>().client().clone();
-        let task_handle = cx.background_executor().spawn(async move {
-            task::spawn(async move {
-                let url = format!("{}/page/{}", Self::BASE_URL, page);
-                let Ok(res) = client.get(url).send().await else {
-                    return None;
-                };
-
-                res.text().await.ok().map(Idle::parse)
-            })
-            .await
-        });
-        cx.spawn(|_view, mut cx| async move {
-            let Some((low, high, items)) = task_handle.await else {
-                cx.update_global::<State, ()>(|state, cx| {
-                    state.machine_mut().page_error(page);
-                    cx.refresh();
-                })
-                .ok();
-
-                return;
-            };
-            if items.is_empty() {
-                cx.update_global::<State, ()>(|state, cx| {
-                    state.machine_mut().page_error(page);
-                    cx.refresh();
-                })
-                .ok();
-
-                return;
-            };
-
+        let (total, items) = cx.global::<DB>().likes(page);
+        cx.spawn(|_, mut cx| async move {
             cx.update_global::<State, ()>(|state, cx| {
                 state.page_mut().to(page);
-                state.page_mut().set_low(low);
-                state.page_mut().set_high(high);
-                state.idle_mut().change_to(items, cx);
+                state.page_mut().set_high(total);
+                state
+                    .idle_mut()
+                    .change_to(items.into_iter().map(|item| item.into()).collect(), cx);
                 state.machine_mut().idle();
                 cx.refresh();
             })
@@ -83,8 +43,8 @@ impl Home {
         .detach();
     }
 
-    fn load_detail(cx: &mut ViewContext<Self>, id: String, href: String) {
-        cx.spawn(|_view, mut cx| async move {
+    fn load_detail(cx: &mut ViewContext<Self>, href: String) {
+        cx.spawn(|_, mut cx| async move {
             cx.update_global::<State, ()>(|state, cx| {
                 state.machine_mut().loading();
                 cx.refresh();
@@ -107,12 +67,10 @@ impl Home {
                 .await
             }
         });
-        let is_liked = cx.global::<DB>().is_liked(&id);
-        let is_liked = cx.new_model(|_| is_liked);
         cx.spawn(|_view, mut cx| async move {
             let Some(doc) = task_handle.await else {
                 cx.update_global::<State, ()>(|state, cx| {
-                    state.machine_mut().detail_error(id, href);
+                    state.machine_mut().detail_error(href);
                     cx.refresh();
                 })
                 .ok();
@@ -120,9 +78,9 @@ impl Home {
                 return;
             };
 
-            let Some(info) = Detail::parse(doc, is_liked, href.clone()) else {
+            let Some(info) = Detail::parse(doc) else {
                 cx.update_global::<State, ()>(|state, cx| {
-                    state.machine_mut().detail_error(id, href);
+                    state.machine_mut().detail_error(href);
                     cx.refresh();
                 })
                 .ok();
@@ -141,7 +99,7 @@ impl Home {
     }
 }
 
-impl Render for Home {
+impl Render for Like {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         let title = cx.global::<State>().title();
         cx.set_window_title(&title);
@@ -154,31 +112,21 @@ impl Render for Home {
             StateMachine::LoadPage(page) => {
                 Self::load_page(cx, *page);
 
-                view.child(Loading)
+                view
             }
             StateMachine::Loading => view.child(Loading),
-            StateMachine::PageError(page) => view.child(Error).on_mouse_down(MouseButton::Left, {
-                let page = *page;
-                move |_event, cx| {
-                    cx.update_global::<State, ()>(|state, cx| {
-                        state.machine_mut().load_page(page);
-                        cx.refresh();
-                    });
-                }
-            }),
-            StateMachine::LoadDetail(id, href) => {
-                Self::load_detail(cx, id.clone(), href.clone());
+            StateMachine::LoadDetail(href) => {
+                Self::load_detail(cx, href.clone());
 
                 view.child(Loading)
             }
-            StateMachine::DetailError(id, href) => view
+            StateMachine::DetailError(href) => view
                 .child(Error)
                 .on_mouse_down(MouseButton::Left, {
                     let href = href.clone();
-                    let id = id.clone();
                     move |_event, cx| {
                         cx.update_global::<State, ()>(|state, cx| {
-                            state.machine_mut().load_detail(id.clone(), href.clone());
+                            state.machine_mut().load_detail(href.clone());
                             cx.refresh();
                         });
                     }

@@ -3,6 +3,7 @@ use gpui::*;
 
 use super::find::Find;
 use super::home::Home;
+use super::like::Like;
 use super::tab::{Tab, TabItem};
 use super::talk::Talk;
 use crate::app_state::AppState;
@@ -14,6 +15,7 @@ pub struct Javdesk {
     home: View<Home>,
     talk: View<Talk>,
     find: View<Find>,
+    like: View<Like>,
 }
 
 impl Javdesk {
@@ -25,6 +27,7 @@ impl Javdesk {
         let home = cx.new_view(|_| Home);
         let talk = cx.new_view(|_| Talk);
         let find = cx.new_view(|_| Find);
+        let like = cx.new_view(|_| Like);
 
         cx.new_view(|_| Self {
             selected,
@@ -32,6 +35,7 @@ impl Javdesk {
             home,
             talk,
             find,
+            like,
         })
     }
 
@@ -52,6 +56,7 @@ impl Render for Javdesk {
             TabItem::Home => view.child(self.home.clone()),
             TabItem::Talk => view.child(self.talk.clone()),
             TabItem::Find => view.child(self.find.clone()),
+            TabItem::Like => view.child(self.like.clone()),
         };
 
         div()

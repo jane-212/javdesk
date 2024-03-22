@@ -1,4 +1,4 @@
-use gpui::{prelude::FluentBuilder, *};
+use gpui::*;
 
 use super::State;
 use crate::{
@@ -6,7 +6,6 @@ use crate::{
     components::{Icon, IconName, Scroll},
     db::DB,
     theme::Theme,
-    views::like,
 };
 
 #[derive(IntoElement, Clone)]
@@ -23,7 +22,6 @@ impl Info {
     const PADDING: Pixels = Pixels(10.0);
     const FOLD: usize = 4;
 
-    #[allow(clippy::too_many_arguments)]
     pub fn new(
         title: String,
         id: String,
@@ -31,8 +29,6 @@ impl Info {
         date: String,
         cost: i32,
         samples: Vec<String>,
-        is_liked: Model<bool>,
-        href: String,
     ) -> Self {
         let list_state = ListState::new(1, ListAlignment::Top, Pixels(0.0), {
             let id = id.clone();
@@ -81,17 +77,12 @@ impl Info {
                                             .rounded_md()
                                             .overflow_hidden(),
                                     )
-                                    .on_mouse_down(MouseButton::Left, {
+                                    .on_mouse_down(MouseButton::Left, move |_event, cx| {
                                         let cover = cover.clone();
-                                        move |_event, cx| {
-                                            let cover = cover.clone();
-                                            cx.update_global::<AppState, ()>(
-                                                move |app_state, cx| {
-                                                    app_state.open(cover);
-                                                    cx.refresh();
-                                                },
-                                            );
-                                        }
+                                        cx.update_global::<AppState, ()>(move |app_state, cx| {
+                                            app_state.open(cover);
+                                            cx.refresh();
+                                        });
                                     }),
                             )
                             .child(
@@ -157,71 +148,21 @@ impl Info {
                                     )
                                     .child(
                                         div()
-                                            .h_full()
-                                            .w_1_5()
-                                            .flex()
-                                            .justify_center()
-                                            .items_center()
-                                            .child(
-                                                div()
-                                                    .size(Self::INFO_HEIGHT * 3 - Self::PADDING * 4)
-                                                    .rounded_lg()
-                                                    .p(Self::PADDING)
-                                                    .hover(|this| this.bg(theme.hover_background))
-                                                    .when_else(
-                                                        *is_liked.read(cx),
-                                                        |this| {
-                                                            this.child(Icon::new(
-                                                                IconName::Like,
-                                                                true,
-                                                            ))
-                                                        },
-                                                        |this| {
-                                                            this.child(Icon::new(
-                                                                IconName::Like,
-                                                                false,
-                                                            ))
-                                                        },
-                                                    )
-                                                    .on_mouse_down(MouseButton::Left, {
-                                                        let id = id.clone();
-                                                        let href = href.clone();
-                                                        let title = title.clone();
-                                                        let cover = cover.clone();
-                                                        let date = date.clone();
-                                                        let is_liked = is_liked.clone();
-                                                        move |_, cx| {
-                                                            if *is_liked.read(cx) {
-                                                                is_liked.update(
-                                                                    cx,
-                                                                    |is_liked, _| {
-                                                                        *is_liked = false;
-                                                                    },
-                                                                );
-                                                                cx.global::<DB>().unlike(&id);
-                                                            } else {
-                                                                is_liked.update(
-                                                                    cx,
-                                                                    |is_liked, _| {
-                                                                        *is_liked = true;
-                                                                    },
-                                                                );
-                                                                cx.global::<DB>().like((
-                                                                    &id, &href, &title, &cover,
-                                                                    &date,
-                                                                ));
-                                                            }
-                                                            cx.update_global::<like::State, ()>(
-                                                                |state, _| {
-                                                                    state
-                                                                        .machine_mut()
-                                                                        .load_page(1);
-                                                                },
-                                                            );
-                                                            cx.refresh();
-                                                        }
-                                                    }),
-                                            ),
+                                            .size(Self::INFO_HEIGHT * 3 - Self::PADDING * 4)
+                                            .rounded_lg()
+                                            .p(Self::PADDING)
+                                            .hover(|this| this.bg(theme.hover_background))
+                                            .child(Icon::new(IconName::Delete, false))
+                                            .on_mouse_down(MouseButton::Left, {
+                                                let id = id.clone();
+                                                move |_, cx| {
+                                                    cx.global::<DB>().unlike(&id);
+                                                    cx.update_global::<State, ()>(|state, _| {
+                                                        state.machine_mut().load_page(1);
+                                                    });
+                                                    cx.refresh();
+                                                }
+                                            }),
                                     ),
                             )
                             .children(new_samples.into_iter().map(move |sample| {

@@ -15,14 +15,16 @@ pub struct Item {
 
 impl Item {
     const HEIGHT: Pixels = Pixels(200.0);
+}
 
-    pub fn new(href: String, cover: String, title: String, id: String, date: String) -> Self {
+impl From<(String, String, String, String, String)> for Item {
+    fn from(value: (String, String, String, String, String)) -> Self {
         Self {
-            href,
-            cover,
-            title,
-            id,
-            date,
+            id: value.0,
+            href: value.1,
+            title: value.2,
+            cover: value.3,
+            date: value.4,
         }
     }
 }
@@ -45,12 +47,10 @@ impl RenderOnce for Item {
                     .h_full()
                     .rounded_lg()
                     .child(
-                        div().h_full().w_1_5().child(
-                            img(self.cover.clone())
-                                .size_full()
-                                .rounded_md()
-                                .overflow_hidden(),
-                        ),
+                        div()
+                            .h_full()
+                            .w_1_5()
+                            .child(img(self.cover).size_full().rounded_md().overflow_hidden()),
                     )
                     .child(
                         div()
@@ -101,17 +101,16 @@ impl RenderOnce for Item {
                                                     .size_6()
                                                     .child(Icon::new(IconName::Date, true)),
                                             )
-                                            .child(self.date.clone()),
+                                            .child(self.date),
                                     ),
                             ),
                     )
                     .hover(|s| s.bg(theme.hover_background))
                     .on_mouse_down(MouseButton::Left, {
                         let href = self.href.clone();
-                        let id = self.id.clone();
                         move |_event, cx| {
                             cx.update_global::<State, ()>(|state, cx| {
-                                state.machine_mut().load_detail(id.clone(), href.clone());
+                                state.machine_mut().load_detail(href.clone());
                                 cx.refresh();
                             });
                         }

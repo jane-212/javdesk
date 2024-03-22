@@ -37,6 +37,8 @@ pub enum IconName {
     Cost,
     View,
     Reply,
+    Like,
+    Delete,
 }
 
 impl IconName {
@@ -52,6 +54,8 @@ impl IconName {
             Self::Cost => "icons/cost.svg",
             Self::View => "icons/view.svg",
             Self::Reply => "icons/reply.svg",
+            Self::Like => "icons/like.svg",
+            Self::Delete => "icons/delete.svg",
         }
     }
 }

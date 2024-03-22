@@ -6,6 +6,7 @@ mod app_state;
 mod assets;
 mod components;
 mod config;
+mod db;
 mod proxy;
 mod theme;
 mod views;

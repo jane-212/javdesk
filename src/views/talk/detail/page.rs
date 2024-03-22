@@ -12,6 +12,7 @@ pub struct Page {
     id: i32,
     current: i32,
     high: i32,
+    pages: Vec<PageItem>,
 }
 
 impl Page {
@@ -22,6 +23,7 @@ impl Page {
             id,
             current: 1,
             high: 1,
+            pages: Vec::new(),
         }
     }
 
@@ -31,6 +33,8 @@ impl Page {
 
     pub fn set_high(&mut self, high: i32) {
         self.high = high;
+        self.pages.clear();
+        self.pages.append(&mut self.pages(self.id));
     }
 
     fn pages(&self, id: i32) -> Vec<PageItem> {
@@ -69,8 +73,6 @@ impl Page {
 
 impl RenderOnce for Page {
     fn render(self, _cx: &mut WindowContext) -> impl IntoElement {
-        let pages = self.pages(self.id);
-
         div()
             .w(SIZE + PADDING * 2)
             .h_full()
@@ -80,13 +82,13 @@ impl RenderOnce for Page {
             .child(
                 div()
                     .w(SIZE)
-                    .h(pages.len() as f32 * (SIZE + MARGIN))
-                    .children(pages),
+                    .h(self.pages.len() as f32 * (SIZE + MARGIN))
+                    .children(self.pages),
             )
     }
 }
 
-#[derive(IntoElement)]
+#[derive(IntoElement, Clone)]
 pub enum PageItem {
     Current(i32, i32),
     Dot,

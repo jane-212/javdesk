@@ -21,7 +21,7 @@ impl Tab {
     fn tabs(selected: Model<TabItem>, cx: &mut WindowContext) -> Vec<AnyElement> {
         let theme = cx.global::<Theme>();
 
-        vec![TabItem::Home, TabItem::Talk, TabItem::Find]
+        vec![TabItem::Home, TabItem::Talk, TabItem::Find, TabItem::Like]
             .into_iter()
             .map(|item| {
                 let active = selected.read(cx) == &item;
@@ -54,6 +54,7 @@ impl Tab {
                     TabItem::Home => view.child(Icon::new(IconName::Home, active)),
                     TabItem::Talk => view.child(Icon::new(IconName::Talk, active)),
                     TabItem::Find => view.child(Icon::new(IconName::Find, active)),
+                    TabItem::Like => view.child(Icon::new(IconName::Like, active)),
                 }
                 .into_any()
             })
@@ -89,4 +90,5 @@ pub enum TabItem {
     Home,
     Talk,
     Find,
+    Like,
 }

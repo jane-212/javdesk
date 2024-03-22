@@ -3,19 +3,19 @@ use std::{fs::OpenOptions, io::Read, path::PathBuf};
 use gpui::*;
 use serde::Deserialize;
 
+use crate::app;
+
 #[derive(Default, Deserialize)]
 pub struct Config {
     pub proxy: Option<String>,
 }
-
-const NAME: &str = "javdesk";
 
 impl Config {
     fn config_path() -> PathBuf {
         let username = whoami::username();
         let user_dir = PathBuf::from("/Users").join(username);
 
-        user_dir.join(".config").join(NAME).join("config.toml")
+        user_dir.join(".config").join(app::NAME).join("config.toml")
     }
 
     fn load_config() -> Self {

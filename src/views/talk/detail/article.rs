@@ -1,3 +1,4 @@
+use gpui::prelude::FluentBuilder;
 use gpui::*;
 use scraper::Html;
 
@@ -206,22 +207,23 @@ impl RenderOnce for Article {
                             ),
                     )
                     .child(
-                        div().h(quote_height).w_full().child(match self.quote {
-                            Some(quote) => div()
-                                .size_full()
-                                .border_l_8()
-                                .border_color(theme.main)
-                                .child(
-                                    div()
-                                        .size_full()
-                                        .flex()
-                                        .pl_2()
-                                        .items_center()
-                                        .overflow_hidden()
-                                        .child(quote),
-                                ),
-                            None => div(),
-                        }),
+                        div()
+                            .h(quote_height)
+                            .w_full()
+                            .when_some(self.quote, |this, quote| {
+                                this.size_full()
+                                    .border_l_8()
+                                    .border_color(theme.main)
+                                    .child(
+                                        div()
+                                            .size_full()
+                                            .flex()
+                                            .pl_2()
+                                            .items_center()
+                                            .overflow_hidden()
+                                            .child(quote),
+                                    )
+                            }),
                     )
                     .child(
                         div()
@@ -237,11 +239,11 @@ impl RenderOnce for Article {
                             .pl_2()
                             .h(reply_height)
                             .w_full()
-                            .pt(if self.replys.is_empty() {
-                                Pixels::ZERO
-                            } else {
-                                Self::PADDING
-                            })
+                            .when_else(
+                                self.replys.is_empty(),
+                                |this| this.pt(Pixels::ZERO),
+                                |this| this.pt(Self::PADDING),
+                            )
                             .children(self.replys),
                     ),
             )

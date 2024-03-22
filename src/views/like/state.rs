@@ -104,13 +104,12 @@ impl State {
 
     pub fn title(&self) -> String {
         match self.state_machine {
-            StateMachine::Idle => "Home".to_string(),
+            StateMachine::Idle => "Like".to_string(),
             StateMachine::Detail => self.detail.title(),
             StateMachine::LoadPage(_) => "Loading".to_string(),
-            StateMachine::LoadDetail(_, _) => "Loading".to_string(),
+            StateMachine::LoadDetail(_) => "Loading".to_string(),
             StateMachine::Loading => "Loading".to_string(),
-            StateMachine::PageError(_) => "Error".to_string(),
-            StateMachine::DetailError(_, _) => "Error".to_string(),
+            StateMachine::DetailError(_) => "Error".to_string(),
         }
     }
 }
@@ -123,10 +122,9 @@ pub enum StateMachine {
     Idle,
     Detail,
     LoadPage(i32),
-    LoadDetail(String, String),
+    LoadDetail(String),
     Loading,
-    PageError(i32),
-    DetailError(String, String),
+    DetailError(String),
 }
 
 impl StateMachine {
@@ -136,8 +134,8 @@ impl StateMachine {
 
     pub fn idle(&mut self) {
         match self {
-            Self::Idle | Self::LoadPage(_) | Self::PageError(_) | Self::LoadDetail(_, _) => {}
-            Self::Loading | Self::Detail | Self::DetailError(_, _) => *self = Self::Idle,
+            Self::Idle | Self::LoadDetail(_) | Self::Loading => {}
+            Self::Detail | Self::DetailError(_) | Self::LoadPage(_) => *self = Self::Idle,
         }
     }
 
@@ -146,67 +144,41 @@ impl StateMachine {
             Self::Detail
             | Self::Idle
             | Self::LoadPage(_)
-            | Self::PageError(_)
-            | Self::DetailError(_, _)
-            | Self::LoadDetail(_, _) => {}
+            | Self::DetailError(_)
+            | Self::LoadDetail(_) => {}
             Self::Loading => *self = Self::Detail,
         }
     }
 
     pub fn load_page(&mut self, page: i32) {
         match self {
-            Self::LoadPage(_)
-            | Self::Loading
-            | Self::LoadDetail(_, _)
-            | Self::Detail
-            | Self::DetailError(_, _) => {}
-            Self::Idle | Self::PageError(_) => *self = Self::LoadPage(page),
+            Self::LoadPage(_) | Self::Loading | Self::LoadDetail(_) | Self::DetailError(_) => {}
+            Self::Idle | Self::Detail => *self = Self::LoadPage(page),
         }
     }
 
-    pub fn load_detail(&mut self, id: String, href: String) {
+    pub fn load_detail(&mut self, href: String) {
         match self {
-            Self::LoadPage(_)
-            | Self::Loading
-            | Self::LoadDetail(_, _)
-            | Self::Detail
-            | Self::PageError(_) => {}
-            Self::Idle | Self::DetailError(_, _) => *self = Self::LoadDetail(id, href),
+            Self::LoadPage(_) | Self::Loading | Self::LoadDetail(_) | Self::Detail => {}
+            Self::Idle | Self::DetailError(_) => *self = Self::LoadDetail(href),
         }
     }
 
     pub fn loading(&mut self) {
         match self {
-            Self::Idle
-            | Self::Loading
-            | Self::PageError(_)
-            | Self::DetailError(_, _)
-            | Self::Detail => {}
-            Self::LoadPage(_) | Self::LoadDetail(_, _) => *self = Self::Loading,
+            Self::Idle | Self::Loading | Self::DetailError(_) | Self::Detail => {}
+            Self::LoadPage(_) | Self::LoadDetail(_) => *self = Self::Loading,
         }
     }
 
-    pub fn page_error(&mut self, page: i32) {
+    pub fn detail_error(&mut self, href: String) {
         match self {
             Self::Idle
             | Self::Detail
             | Self::LoadPage(_)
-            | Self::LoadDetail(_, _)
-            | Self::PageError(_)
-            | Self::DetailError(_, _) => {}
-            Self::Loading => *self = Self::PageError(page),
-        }
-    }
-
-    pub fn detail_error(&mut self, id: String, href: String) {
-        match self {
-            Self::Idle
-            | Self::Detail
-            | Self::LoadPage(_)
-            | Self::LoadDetail(_, _)
-            | Self::PageError(_)
-            | Self::DetailError(_, _) => {}
-            Self::Loading => *self = Self::DetailError(id, href),
+            | Self::LoadDetail(_)
+            | Self::DetailError(_) => {}
+            Self::Loading => *self = Self::DetailError(href),
         }
     }
 }
