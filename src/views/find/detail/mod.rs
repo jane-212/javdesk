@@ -7,6 +7,7 @@ mod page;
 mod selector;
 
 use super::State;
+#[cfg(feature = "avatar")]
 use crate::proxy::ProxyUrl;
 use article::{Article, Reply};
 use info::Info;
@@ -40,6 +41,7 @@ impl Detail {
             return None;
         };
 
+        #[cfg(feature = "avatar")]
         let post_avatar = html
             .select(&selectors().post_avatar)
             .next()
@@ -65,10 +67,12 @@ impl Detail {
                     return articles;
                 };
 
+                #[cfg(feature = "avatar")]
                 let avatar = item
                     .select(&selectors().avatar)
                     .next()
                     .and_then(|avatar| avatar.attr("src"));
+                #[cfg(feature = "avatar")]
                 let avatar = match (avatar, post_avatar) {
                     (Some(avatar), None) | (Some(avatar), Some(_)) | (None, Some(avatar)) => {
                         ProxyUrl::Avatar(avatar.to_string()).to_string()
@@ -90,6 +94,7 @@ impl Detail {
                 let replys =
                     item.select(&selectors().replys)
                         .fold(Vec::new(), |mut replys, reply| {
+                            #[cfg(feature = "avatar")]
                             let Some(avatar) = reply
                                 .select(&selectors().reply_avatar)
                                 .next()
@@ -137,7 +142,10 @@ impl Detail {
                                 return replys;
                             };
 
+                            #[cfg(feature = "avatar")]
                             replys.push(Reply::new(avatar, name, content));
+                            #[cfg(not(feature = "avatar"))]
+                            replys.push(Reply::new(name, content));
                             replys
                         });
 
@@ -157,7 +165,13 @@ impl Detail {
                 });
 
                 articles.push(
+                    #[cfg(feature = "avatar")]
                     Article::new(avatar, name)
+                        .parse(content)
+                        .set_replys(replys)
+                        .set_quote(quote),
+                    #[cfg(not(feature = "avatar"))]
+                    Article::new(name)
                         .parse(content)
                         .set_replys(replys)
                         .set_quote(quote),

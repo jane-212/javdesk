@@ -7,6 +7,7 @@ use crate::theme::Theme;
 #[derive(IntoElement, Clone)]
 pub struct Item {
     id: i32,
+    #[cfg(feature = "avatar")]
     avatar: String,
     title: String,
     name: String,
@@ -22,7 +23,7 @@ impl Item {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         id: i32,
-        avatar: String,
+        #[cfg(feature = "avatar")] avatar: String,
         title: String,
         name: String,
         date: String,
@@ -32,6 +33,7 @@ impl Item {
     ) -> Self {
         Self {
             id,
+            #[cfg(feature = "avatar")]
             avatar,
             title,
             name,
@@ -65,6 +67,7 @@ impl RenderOnce for Item {
                             .h_full()
                             .w_1_3()
                             .child(
+                                #[cfg(feature = "avatar")]
                                 div()
                                     .w_full()
                                     .h_2_5()
@@ -78,6 +81,8 @@ impl RenderOnce for Item {
                                             .rounded_full()
                                             .overflow_hidden(),
                                     ),
+                                #[cfg(not(feature = "avatar"))]
+                                div(),
                             )
                             .child(
                                 div()

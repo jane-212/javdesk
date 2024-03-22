@@ -38,3 +38,6 @@ Javdesk is a desktop of javbus.
 lto = "fat"
 codegen-units = 1
 panic = "abort"
+
+[features]
+avatar = []

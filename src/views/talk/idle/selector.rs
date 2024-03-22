@@ -5,6 +5,7 @@ use scraper::Selector;
 pub struct Selectors {
     pub page: Selector,
     pub items: Selector,
+    #[cfg(feature = "avatar")]
     pub avatar: Selector,
     pub title: Selector,
     pub date: Selector,
@@ -26,6 +27,7 @@ impl Selectors {
         Self {
             page: selector!("a#autopbn"),
             items: selector!("table#threadlisttableid>tbody"),
+            #[cfg(feature = "avatar")]
             avatar: selector!("tr>th>div.post_avatar>a>img"),
             title: selector!(
                 "tr>th>div.post_inforight>div.post_infolist>div.post_infolist_tit>a.s"

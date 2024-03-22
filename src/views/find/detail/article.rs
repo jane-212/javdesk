@@ -7,6 +7,7 @@ use crate::theme::Theme;
 
 #[derive(Clone, IntoElement)]
 pub struct Article {
+    #[cfg(feature = "avatar")]
     avatar: String,
     name: String,
     content: Vec<Line>,
@@ -19,9 +20,19 @@ impl Article {
     const QUOTE_HEIGHT: Pixels = Pixels(90.0);
     const PADDING: Pixels = Pixels(20.0);
 
+    #[cfg(feature = "avatar")]
     pub fn new(avatar: String, name: String) -> Self {
         Self {
             avatar,
+            name,
+            content: Vec::new(),
+            quote: None,
+            replys: Vec::new(),
+        }
+    }
+    #[cfg(not(feature = "avatar"))]
+    pub fn new(name: String) -> Self {
+        Self {
             name,
             content: Vec::new(),
             quote: None,
@@ -175,11 +186,14 @@ impl RenderOnce for Article {
                             .flex()
                             .items_center()
                             .child(
+                                #[cfg(feature = "avatar")]
                                 img(self.avatar)
                                     .size(Self::USER_HEIGHT)
                                     .rounded_full()
                                     .object_fit(ObjectFit::Fill)
                                     .overflow_hidden(),
+                                #[cfg(not(feature = "avatar"))]
+                                div(),
                             )
                             .child(
                                 div()
@@ -281,6 +295,7 @@ impl RenderOnce for Line {
 
 #[derive(Clone, IntoElement)]
 pub struct Reply {
+    #[cfg(feature = "avatar")]
     avatar: String,
     name: String,
     content: String,
@@ -289,12 +304,17 @@ pub struct Reply {
 impl Reply {
     const HEIGHT: Pixels = Pixels(40.0);
 
+    #[cfg(feature = "avatar")]
     pub fn new(avatar: String, name: String, content: String) -> Self {
         Self {
             avatar,
             name,
             content,
         }
+    }
+    #[cfg(not(feature = "avatar"))]
+    pub fn new(name: String, content: String) -> Self {
+        Self { name, content }
     }
 
     fn height(&self) -> Pixels {
@@ -312,12 +332,15 @@ impl RenderOnce for Reply {
             .flex()
             .items_center()
             .child(
+                #[cfg(feature = "avatar")]
                 img(self.avatar)
                     .size_6()
                     .min_w_6()
                     .rounded_full()
                     .overflow_hidden()
                     .object_fit(ObjectFit::Fill),
+                #[cfg(not(feature = "avatar"))]
+                div(),
             )
             .child(div().text_color(theme.name).pl_2().child(self.name))
             .child(div().pl_2().child(self.content))

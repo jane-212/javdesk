@@ -7,6 +7,7 @@ use crate::theme::Theme;
 #[derive(IntoElement, Clone)]
 pub struct Item {
     id: i32,
+    #[cfg(feature = "avatar")]
     avatar: String,
     title: String,
     name: String,
@@ -22,7 +23,7 @@ impl Item {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         id: i32,
-        avatar: String,
+        #[cfg(feature = "avatar")] avatar: String,
         title: String,
         name: String,
         date: String,
@@ -32,6 +33,7 @@ impl Item {
     ) -> Self {
         Self {
             id,
+            #[cfg(feature = "avatar")]
             avatar,
             title,
             name,
@@ -61,6 +63,7 @@ impl RenderOnce for Item {
                     .h_full()
                     .rounded_lg()
                     .child(
+                        #[cfg(feature = "avatar")]
                         div()
                             .h_full()
                             .w_1_3()
@@ -86,11 +89,11 @@ impl RenderOnce for Item {
                                     .w_full()
                                     .child(
                                         div()
-                                            .flex()
-                                            .items_center()
-                                            .justify_center()
                                             .w_full()
                                             .h_1_2()
+                                            .flex()
+                                            .justify_center()
+                                            .items_center()
                                             .text_color(theme.name)
                                             .child(self.name),
                                     )
@@ -110,6 +113,38 @@ impl RenderOnce for Item {
                                             .child(self.date),
                                     ),
                             ),
+                        #[cfg(not(feature = "avatar"))]
+                        div().h_full().w_1_3().child(
+                            div()
+                                .h_1_2()
+                                .p_2()
+                                .w_full()
+                                .child(
+                                    div()
+                                        .flex()
+                                        .items_center()
+                                        .justify_center()
+                                        .w_full()
+                                        .h_1_2()
+                                        .text_color(theme.name)
+                                        .child(self.name),
+                                )
+                                .child(
+                                    div()
+                                        .flex()
+                                        .items_center()
+                                        .justify_center()
+                                        .w_full()
+                                        .h_1_2()
+                                        .child(
+                                            div()
+                                                .mr_2()
+                                                .size_6()
+                                                .child(Icon::new(IconName::Date, true)),
+                                        )
+                                        .child(self.date),
+                                ),
+                        ),
                     )
                     .child(
                         div()

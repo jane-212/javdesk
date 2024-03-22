@@ -86,6 +86,7 @@ async fn image(param: web::Query<Param>, state: web::Data<State>) -> impl Respon
 
 pub enum ProxyUrl {
     Home(String),
+    #[cfg(feature = "avatar")]
     Avatar(String),
     Talk(String),
 }
@@ -94,6 +95,7 @@ impl ToString for ProxyUrl {
     fn to_string(&self) -> String {
         match self {
             ProxyUrl::Home(src) => format!("http://127.0.0.1:8888/image?t=home&src={}", src),
+            #[cfg(feature = "avatar")]
             ProxyUrl::Avatar(src) => format!("http://127.0.0.1:8888/image?t=avatar&src={}", src),
             ProxyUrl::Talk(src) => format!("http://127.0.0.1:8888/image?t=talk&src={}", src),
         }
@@ -101,24 +103,30 @@ impl ToString for ProxyUrl {
 }
 
 fn headers(t: &str) -> &'static HeaderMap {
-    let mut headers = HeaderMap::new();
-    headers.insert(header::USER_AGENT, HeaderValue::from_static("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15"));
-    headers.insert(
-        header::REFERER,
-        HeaderValue::from_static("https://www.javbus.com/"),
-    );
-
     match t {
         "home" => {
             static CLIENT: OnceLock<HeaderMap> = OnceLock::new();
             CLIENT.get_or_init(|| {
+                let mut headers = HeaderMap::new();
+                headers.insert(header::USER_AGENT, HeaderValue::from_static("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15"));
+                headers.insert(
+                    header::REFERER,
+                    HeaderValue::from_static("https://www.javbus.com/"),
+                );
                 headers.insert(header::HOST, HeaderValue::from_static("www.javbus.com"));
                 headers
             })
         }
+        #[cfg(feature = "avatar")]
         "avatar" => {
             static CLIENT: OnceLock<HeaderMap> = OnceLock::new();
             CLIENT.get_or_init(|| {
+                let mut headers = HeaderMap::new();
+                headers.insert(header::USER_AGENT, HeaderValue::from_static("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15"));
+                headers.insert(
+                    header::REFERER,
+                    HeaderValue::from_static("https://www.javbus.com/"),
+                );
                 headers.insert(header::HOST, HeaderValue::from_static("uc.javbus22.com"));
                 headers
             })
@@ -126,6 +134,12 @@ fn headers(t: &str) -> &'static HeaderMap {
         "talk" => {
             static CLIENT: OnceLock<HeaderMap> = OnceLock::new();
             CLIENT.get_or_init(|| {
+                let mut headers = HeaderMap::new();
+                headers.insert(header::USER_AGENT, HeaderValue::from_static("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15"));
+                headers.insert(
+                    header::REFERER,
+                    HeaderValue::from_static("https://www.javbus.com/"),
+                );
                 headers.insert(header::HOST, HeaderValue::from_static("cloud.javcdn.cc"));
                 headers
             })
@@ -133,6 +147,12 @@ fn headers(t: &str) -> &'static HeaderMap {
         _ => {
             static CLIENT: OnceLock<HeaderMap> = OnceLock::new();
             CLIENT.get_or_init(|| {
+                let mut headers = HeaderMap::new();
+                headers.insert(header::USER_AGENT, HeaderValue::from_static("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15"));
+                headers.insert(
+                    header::REFERER,
+                    HeaderValue::from_static("https://www.javbus.com/"),
+                );
                 headers.insert(header::HOST, HeaderValue::from_static("www.javbus.com"));
                 headers
             })

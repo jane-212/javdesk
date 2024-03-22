@@ -3,6 +3,7 @@ use std::sync::OnceLock;
 use scraper::Selector;
 
 pub struct Selectors {
+    #[cfg(feature = "avatar")]
     pub post_avatar: Selector,
     pub post_name: Selector,
     pub page: Selector,
@@ -13,6 +14,7 @@ pub struct Selectors {
     pub name: Selector,
     pub content: Selector,
     pub replys: Selector,
+    #[cfg(feature = "avatar")]
     pub reply_avatar: Selector,
     pub reply_name: Selector,
     pub reply_content: Selector,
@@ -28,6 +30,7 @@ macro_rules! selector {
 impl Selectors {
     fn new() -> Self {
         Self {
+            #[cfg(feature = "avatar")]
             post_avatar: selector!(
                 "div#ct>div.wp>div.sd>div.viewthread_authorinfo>div.avatar>a.avtm>img"
             ),
@@ -40,6 +43,7 @@ impl Selectors {
             name: selector!("td.plc>div.pi>div.pti>div.authi>a.xw1"),
             content: selector!("td.plc>div.pct>div.pcb>div.t_fsz>table>tbody>tr>td"),
             replys: selector!("td.plc>div.pct>div.pcb>div.cm>div.pstl"),
+            #[cfg(feature = "avatar")]
             reply_avatar: selector!("div.psta>a>img"),
             reply_name: selector!("div.psta>a.xw1"),
             reply_content: selector!("div.psti"),

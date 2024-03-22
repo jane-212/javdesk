@@ -79,6 +79,7 @@ impl Idle {
                 return;
             };
 
+            #[cfg(feature = "avatar")]
             let Some(avatar) = item
                 .select(&selectors().avatar)
                 .next()
@@ -150,6 +151,7 @@ impl Idle {
 
             items.push(Item::new(
                 id,
+                #[cfg(feature = "avatar")]
                 ProxyUrl::Avatar(avatar).to_string(),
                 title,
                 name,
