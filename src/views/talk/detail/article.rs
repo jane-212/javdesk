@@ -80,42 +80,45 @@ impl Article {
             }
         }
 
-        let lines = elements.into_iter().fold(Vec::new(), |mut lines, element| {
+        let mut lines = Vec::new();
+        let mut line = String::new();
+        for element in elements.into_iter() {
             match element {
                 Element::Text(text) => {
-                    const LINE_COUNT: usize = 60;
-                    let mut line = String::new();
-
-                    for c in text.chars() {
-                        if line.chars().count() == LINE_COUNT {
-                            lines.push(Line::Text(line));
-                            line = String::new();
-                        }
-
-                        line.push(c);
-                    }
-                    if !line.is_empty() {
-                        lines.push(Line::Text(line));
-                    }
+                    line.push_str(&text);
                 }
                 Element::Tag(tag) => {
                     let html = Html::parse_fragment(&tag);
                     let Some(value) = html.root_element().child_elements().next() else {
-                        return lines;
+                        continue;
                     };
 
-                    if value.value().name() == "img" {
-                        if let Some(src) = value.attr("src") {
-                            if !src.starts_with("static") {
-                                lines
-                                    .push(Line::Image(ProxyUrl::Talk(src.to_string()).to_string()));
+                    match value.value().name() {
+                        "img" => {
+                            if let Some(src) = value.attr("src") {
+                                if !src.starts_with("static") {
+                                    lines.push(Line::Image(
+                                        ProxyUrl::Talk(src.to_string()).to_string(),
+                                    ));
+                                }
                             }
                         }
+                        "br" => {
+                            let new_line = line.trim().replace("&nbsp;", " ").to_string();
+                            if !line.is_empty() {
+                                lines.push(Line::Text(new_line));
+                                line.clear();
+                            }
+                        }
+                        _ => {}
                     }
                 }
             }
-            lines
-        });
+        }
+        let line = line.trim().replace("&nbsp;", " ").to_string();
+        if !line.is_empty() {
+            lines.push(Line::Text(line));
+        }
 
         self.content = lines;
 
@@ -147,11 +150,6 @@ impl Article {
 impl RenderOnce for Article {
     fn render(self, cx: &mut WindowContext) -> impl IntoElement {
         let theme = cx.global::<Theme>();
-
-        let content_height = self
-            .content
-            .iter()
-            .fold(Pixels::ZERO, |height, line| height + line.height());
 
         let reply_height = if !self.replys.is_empty() {
             self.replys
@@ -227,7 +225,6 @@ impl RenderOnce for Article {
                     )
                     .child(
                         div()
-                            .h(content_height)
                             .w_full()
                             .border_l_1()
                             .border_color(theme.main)
@@ -250,32 +247,23 @@ impl RenderOnce for Article {
     }
 }
 
-#[derive(Clone, IntoElement)]
+#[derive(Clone, IntoElement, Debug)]
 enum Line {
     Image(String),
     Text(String),
 }
 
 impl Line {
-    const HEIGHT: Pixels = Pixels(40.0);
-
-    fn height(&self) -> Pixels {
-        match self {
-            Line::Image(_) => Self::HEIGHT * 10,
-            Line::Text(_) => Self::HEIGHT,
-        }
-    }
+    const HEIGHT: Pixels = Pixels(400.0);
 }
 
 impl RenderOnce for Line {
     fn render(self, _cx: &mut WindowContext) -> impl IntoElement {
-        let height = self.height();
-
         match self {
             Line::Image(src) => div()
                 .p_2()
                 .w_full()
-                .h(height)
+                .h(Self::HEIGHT)
                 .child(img(src.clone()).size_full().rounded_md().overflow_hidden())
                 .on_mouse_down(MouseButton::Left, move |_event, cx| {
                     let src = src.clone();
@@ -284,13 +272,7 @@ impl RenderOnce for Line {
                         cx.refresh();
                     });
                 }),
-            Line::Text(text) => div()
-                .w_full()
-                .h(height)
-                .flex()
-                .line_height(Pixels::ZERO)
-                .items_center()
-                .child(text),
+            Line::Text(text) => div().w_full().child(text),
         }
     }
 }
@@ -345,6 +327,6 @@ impl RenderOnce for Reply {
                 div(),
             )
             .child(div().text_color(theme.name).pl_2().child(self.name))
-            .child(div().pl_2().child(self.content))
+            .child(div().overflow_hidden().pl_2().child(self.content))
     }
 }

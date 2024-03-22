@@ -114,37 +114,43 @@ impl RenderOnce for Item {
                                     ),
                             ),
                         #[cfg(not(feature = "avatar"))]
-                        div().h_full().w_1_3().child(
-                            div()
-                                .h_1_2()
-                                .p_2()
-                                .w_full()
-                                .child(
-                                    div()
-                                        .flex()
-                                        .items_center()
-                                        .justify_center()
-                                        .w_full()
-                                        .h_1_2()
-                                        .text_color(theme.name)
-                                        .child(self.name),
-                                )
-                                .child(
-                                    div()
-                                        .flex()
-                                        .items_center()
-                                        .justify_center()
-                                        .w_full()
-                                        .h_1_2()
-                                        .child(
-                                            div()
-                                                .mr_2()
-                                                .size_6()
-                                                .child(Icon::new(IconName::Date, true)),
-                                        )
-                                        .child(self.date),
-                                ),
-                        ),
+                        div()
+                            .flex()
+                            .items_center()
+                            .justify_center()
+                            .h_full()
+                            .w_1_3()
+                            .child(
+                                div()
+                                    .h_1_2()
+                                    .p_2()
+                                    .w_full()
+                                    .child(
+                                        div()
+                                            .flex()
+                                            .items_center()
+                                            .justify_center()
+                                            .w_full()
+                                            .h_1_2()
+                                            .text_color(theme.name)
+                                            .child(self.name),
+                                    )
+                                    .child(
+                                        div()
+                                            .flex()
+                                            .items_center()
+                                            .justify_center()
+                                            .w_full()
+                                            .h_1_2()
+                                            .child(
+                                                div()
+                                                    .mr_2()
+                                                    .size_6()
+                                                    .child(Icon::new(IconName::Date, true)),
+                                            )
+                                            .child(self.date),
+                                    ),
+                            ),
                     )
                     .child(
                         div()
