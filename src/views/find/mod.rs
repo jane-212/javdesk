@@ -42,7 +42,7 @@ impl Find {
         let task_handle = cx.background_executor().spawn(async move {
             task::spawn(async move {
                 let url = format!(
-                    "{}/forum/forum.php?mod=forumdisplay&fid=2&page={}",
+                    "{}/forum/forum.php?mod=forumdisplay&fid=36&page={}",
                     Self::BASE_URL,
                     page
                 );
