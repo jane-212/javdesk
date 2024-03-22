@@ -1,4 +1,4 @@
-use gpui::{prelude::FluentBuilder, *};
+use gpui::*;
 
 use super::State;
 use crate::{
@@ -31,7 +31,6 @@ impl Info {
         date: String,
         cost: i32,
         samples: Vec<String>,
-        is_liked: Model<bool>,
         href: String,
     ) -> Self {
         let list_state = ListState::new(1, ListAlignment::Top, Pixels(0.0), {
@@ -168,49 +167,17 @@ impl Info {
                                                     .rounded_lg()
                                                     .p(Self::PADDING)
                                                     .hover(|this| this.bg(theme.hover_background))
-                                                    .when_else(
-                                                        *is_liked.read(cx),
-                                                        |this| {
-                                                            this.child(Icon::new(
-                                                                IconName::Like,
-                                                                true,
-                                                            ))
-                                                        },
-                                                        |this| {
-                                                            this.child(Icon::new(
-                                                                IconName::Like,
-                                                                false,
-                                                            ))
-                                                        },
-                                                    )
+                                                    .child(Icon::new(IconName::Like, true))
                                                     .on_mouse_down(MouseButton::Left, {
                                                         let id = id.clone();
                                                         let href = href.clone();
                                                         let title = title.clone();
                                                         let cover = cover.clone();
                                                         let date = date.clone();
-                                                        let is_liked = is_liked.clone();
                                                         move |_, cx| {
-                                                            if *is_liked.read(cx) {
-                                                                is_liked.update(
-                                                                    cx,
-                                                                    |is_liked, _| {
-                                                                        *is_liked = false;
-                                                                    },
-                                                                );
-                                                                cx.global::<DB>().unlike(&id);
-                                                            } else {
-                                                                is_liked.update(
-                                                                    cx,
-                                                                    |is_liked, _| {
-                                                                        *is_liked = true;
-                                                                    },
-                                                                );
-                                                                cx.global::<DB>().like((
-                                                                    &id, &href, &title, &cover,
-                                                                    &date,
-                                                                ));
-                                                            }
+                                                            cx.global::<DB>().like((
+                                                                &id, &href, &title, &cover, &date,
+                                                            ));
                                                             cx.update_global::<like::State, ()>(
                                                                 |state, _| {
                                                                     state

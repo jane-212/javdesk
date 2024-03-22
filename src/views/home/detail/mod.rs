@@ -21,7 +21,7 @@ impl Detail {
         Self { info: None }
     }
 
-    pub fn parse(doc: String, is_liked: Model<bool>, href: String) -> Option<Info> {
+    pub fn parse(doc: String, href: String) -> Option<Info> {
         let html = Html::parse_document(&doc);
 
         let Some(title) = html
@@ -117,9 +117,7 @@ impl Detail {
             })
             .collect();
 
-        Some(Info::new(
-            title, id, cover, date, cost, samples, is_liked, href,
-        ))
+        Some(Info::new(title, id, cover, date, cost, samples, href))
     }
 
     pub fn show(&mut self, info: Info) {

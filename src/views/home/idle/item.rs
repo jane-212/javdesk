@@ -108,10 +108,9 @@ impl RenderOnce for Item {
                     .hover(|s| s.bg(theme.hover_background))
                     .on_mouse_down(MouseButton::Left, {
                         let href = self.href.clone();
-                        let id = self.id.clone();
                         move |_event, cx| {
                             cx.update_global::<State, ()>(|state, cx| {
-                                state.machine_mut().load_detail(id.clone(), href.clone());
+                                state.machine_mut().load_detail(href.clone());
                                 cx.refresh();
                             });
                         }

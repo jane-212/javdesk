@@ -6,8 +6,8 @@ mod idle;
 mod page;
 mod state;
 
+use crate::views::error::Error;
 use crate::views::loading::Loading;
-use crate::{db::DB, views::error::Error};
 use detail::Detail;
 use idle::Idle;
 use state::{State, StateMachine};
@@ -83,7 +83,7 @@ impl Home {
         .detach();
     }
 
-    fn load_detail(cx: &mut ViewContext<Self>, id: String, href: String) {
+    fn load_detail(cx: &mut ViewContext<Self>, href: String) {
         cx.spawn(|_view, mut cx| async move {
             cx.update_global::<State, ()>(|state, cx| {
                 state.machine_mut().loading();
@@ -107,12 +107,10 @@ impl Home {
                 .await
             }
         });
-        let is_liked = cx.global::<DB>().is_liked(&id);
-        let is_liked = cx.new_model(|_| is_liked);
         cx.spawn(|_view, mut cx| async move {
             let Some(doc) = task_handle.await else {
                 cx.update_global::<State, ()>(|state, cx| {
-                    state.machine_mut().detail_error(id, href);
+                    state.machine_mut().detail_error(href);
                     cx.refresh();
                 })
                 .ok();
@@ -120,9 +118,9 @@ impl Home {
                 return;
             };
 
-            let Some(info) = Detail::parse(doc, is_liked, href.clone()) else {
+            let Some(info) = Detail::parse(doc, href.clone()) else {
                 cx.update_global::<State, ()>(|state, cx| {
-                    state.machine_mut().detail_error(id, href);
+                    state.machine_mut().detail_error(href);
                     cx.refresh();
                 })
                 .ok();
@@ -166,19 +164,18 @@ impl Render for Home {
                     });
                 }
             }),
-            StateMachine::LoadDetail(id, href) => {
-                Self::load_detail(cx, id.clone(), href.clone());
+            StateMachine::LoadDetail(href) => {
+                Self::load_detail(cx, href.clone());
 
                 view.child(Loading)
             }
-            StateMachine::DetailError(id, href) => view
+            StateMachine::DetailError(href) => view
                 .child(Error)
                 .on_mouse_down(MouseButton::Left, {
                     let href = href.clone();
-                    let id = id.clone();
                     move |_event, cx| {
                         cx.update_global::<State, ()>(|state, cx| {
-                            state.machine_mut().load_detail(id.clone(), href.clone());
+                            state.machine_mut().load_detail(href.clone());
                             cx.refresh();
                         });
                     }

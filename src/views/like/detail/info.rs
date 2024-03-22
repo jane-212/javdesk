@@ -148,21 +148,33 @@ impl Info {
                                     )
                                     .child(
                                         div()
-                                            .size(Self::INFO_HEIGHT * 3 - Self::PADDING * 4)
-                                            .rounded_lg()
-                                            .p(Self::PADDING)
-                                            .hover(|this| this.bg(theme.hover_background))
-                                            .child(Icon::new(IconName::Delete, false))
-                                            .on_mouse_down(MouseButton::Left, {
-                                                let id = id.clone();
-                                                move |_, cx| {
-                                                    cx.global::<DB>().unlike(&id);
-                                                    cx.update_global::<State, ()>(|state, _| {
-                                                        state.machine_mut().load_page(1);
-                                                    });
-                                                    cx.refresh();
-                                                }
-                                            }),
+                                            .h_full()
+                                            .w_1_5()
+                                            .flex()
+                                            .justify_center()
+                                            .items_center()
+                                            .child(
+                                                div()
+                                                    .size(Self::INFO_HEIGHT * 3 - Self::PADDING * 4)
+                                                    .rounded_lg()
+                                                    .p(Self::PADDING)
+                                                    .hover(|this| this.bg(theme.hover_background))
+                                                    .child(Icon::new(IconName::Delete, true))
+                                                    .on_mouse_down(MouseButton::Left, {
+                                                        let id = id.clone();
+                                                        move |_, cx| {
+                                                            cx.global::<DB>().unlike(&id);
+                                                            cx.update_global::<State, ()>(
+                                                                |state, _| {
+                                                                    state
+                                                                        .machine_mut()
+                                                                        .load_page(1);
+                                                                },
+                                                            );
+                                                            cx.refresh();
+                                                        }
+                                                    }),
+                                            ),
                                     ),
                             )
                             .children(new_samples.into_iter().map(move |sample| {

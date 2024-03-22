@@ -58,14 +58,6 @@ impl DB {
             .ok();
     }
 
-    pub fn is_liked(&self, id: &str) -> bool {
-        self.connection
-            .query_row("SELECT COUNT(*) FROM javbus WHERE id = ?1", [id], |row| {
-                row.get(0).map(|count: i32| count > 0)
-            })
-            .unwrap_or(false)
-    }
-
     pub fn likes(&self, page: i32) -> (i32, LikeItems) {
         let likes = Vec::new();
         let Ok(total) = self
