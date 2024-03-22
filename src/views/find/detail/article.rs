@@ -12,13 +12,11 @@ pub struct Article {
     avatar: String,
     name: String,
     content: Vec<Line>,
-    quote: Option<String>,
     replys: Vec<Reply>,
 }
 
 impl Article {
     const USER_HEIGHT: Pixels = Pixels(50.0);
-    const QUOTE_HEIGHT: Pixels = Pixels(90.0);
     const PADDING: Pixels = Pixels(20.0);
 
     #[cfg(feature = "avatar")]
@@ -27,7 +25,6 @@ impl Article {
             avatar,
             name,
             content: Vec::new(),
-            quote: None,
             replys: Vec::new(),
         }
     }
@@ -36,7 +33,6 @@ impl Article {
         Self {
             name,
             content: Vec::new(),
-            quote: None,
             replys: Vec::new(),
         }
     }
@@ -133,14 +129,15 @@ impl Article {
     }
 
     pub fn set_quote(mut self, quote: Option<String>) -> Self {
-        if let Some(quote) = quote {
+        if let Some(text) = quote.clone() {
             self.content = self
                 .content
                 .into_iter()
-                .skip(quote.lines().count())
+                .skip(text.lines().count())
+                .rev()
+                .chain(quote.map(Line::Quote))
+                .rev()
                 .collect();
-
-            self.quote = Some(quote);
         }
 
         self
@@ -156,12 +153,6 @@ impl RenderOnce for Article {
                 .iter()
                 .fold(Pixels::ZERO, |height, reply| height + reply.height())
                 + Self::PADDING
-        } else {
-            Pixels::ZERO
-        };
-
-        let quote_height = if self.quote.is_some() {
-            Self::QUOTE_HEIGHT
         } else {
             Pixels::ZERO
         };
@@ -206,25 +197,6 @@ impl RenderOnce for Article {
                     )
                     .child(
                         div()
-                            .h(quote_height)
-                            .w_full()
-                            .when_some(self.quote, |this, quote| {
-                                this.size_full()
-                                    .border_l_8()
-                                    .border_color(theme.main)
-                                    .child(
-                                        div()
-                                            .size_full()
-                                            .flex()
-                                            .pl_2()
-                                            .items_center()
-                                            .overflow_hidden()
-                                            .child(quote),
-                                    )
-                            }),
-                    )
-                    .child(
-                        div()
                             .w_full()
                             .border_l_1()
                             .border_color(theme.main)
@@ -251,6 +223,7 @@ impl RenderOnce for Article {
 enum Line {
     Image(String),
     Text(String),
+    Quote(String),
 }
 
 impl Line {
@@ -258,7 +231,9 @@ impl Line {
 }
 
 impl RenderOnce for Line {
-    fn render(self, _cx: &mut WindowContext) -> impl IntoElement {
+    fn render(self, cx: &mut WindowContext) -> impl IntoElement {
+        let theme = cx.global::<Theme>();
+
         match self {
             Line::Image(src) => div()
                 .p_2()
@@ -272,7 +247,32 @@ impl RenderOnce for Line {
                         cx.refresh();
                     });
                 }),
-            Line::Text(text) => div().w_full().child(text),
+            Line::Text(text) => div().w_full().child(text.clone()).on_mouse_down(
+                MouseButton::Left,
+                move |_event, cx| {
+                    let mut key = String::new();
+                    let mut begin = false;
+                    for c in text.chars() {
+                        if c.is_ascii_alphanumeric() || c == '-' || c == ' ' {
+                            begin = true;
+                            key.push(c);
+                            continue;
+                        }
+
+                        if begin {
+                            break;
+                        }
+                    }
+
+                    cx.open_url(&format!("https://missav.com/cn/search/{}", key.trim()));
+                },
+            ),
+            Line::Quote(text) => div()
+                .w_full()
+                .child(text)
+                .pl_2()
+                .border_l_8()
+                .border_color(theme.main),
         }
     }
 }
