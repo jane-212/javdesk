@@ -1,3 +1,4 @@
+use gpui::prelude::FluentBuilder;
 use gpui::*;
 
 use super::article::Article;
@@ -65,9 +66,6 @@ impl RenderOnce for Info {
                         });
                     }),
             )
-            .child(match self.page {
-                Some(page) => div().child(page),
-                None => div(),
-            })
+            .when_some(self.page, |this, page| this.child(page))
     }
 }

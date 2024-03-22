@@ -63,11 +63,11 @@ impl RenderOnce for Item {
                     .h_full()
                     .rounded_lg()
                     .child(
+                        #[cfg(feature = "avatar")]
                         div()
                             .h_full()
                             .w_1_3()
                             .child(
-                                #[cfg(feature = "avatar")]
                                 div()
                                     .w_full()
                                     .h_2_5()
@@ -81,12 +81,48 @@ impl RenderOnce for Item {
                                             .rounded_full()
                                             .overflow_hidden(),
                                     ),
-                                #[cfg(not(feature = "avatar"))]
-                                div(),
                             )
                             .child(
                                 div()
                                     .h_3_5()
+                                    .p_2()
+                                    .w_full()
+                                    .child(
+                                        div()
+                                            .w_full()
+                                            .h_1_2()
+                                            .flex()
+                                            .justify_center()
+                                            .items_center()
+                                            .text_color(theme.name)
+                                            .child(self.name),
+                                    )
+                                    .child(
+                                        div()
+                                            .flex()
+                                            .items_center()
+                                            .justify_center()
+                                            .w_full()
+                                            .h_1_2()
+                                            .child(
+                                                div()
+                                                    .mr_2()
+                                                    .size_6()
+                                                    .child(Icon::new(IconName::Date, true)),
+                                            )
+                                            .child(self.date),
+                                    ),
+                            ),
+                        #[cfg(not(feature = "avatar"))]
+                        div()
+                            .flex()
+                            .items_center()
+                            .justify_center()
+                            .h_full()
+                            .w_1_3()
+                            .child(
+                                div()
+                                    .h_1_2()
                                     .p_2()
                                     .w_full()
                                     .child(
