@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 
@@ -72,11 +74,20 @@ impl Render for Javdesk {
             .when_some(app_state.view_image().clone(), |this, src| {
                 let size = cx.viewport_size();
                 this.child(
-                    img(src)
+                    img(src.clone())
                         .w(size.width - Self::IMAGE_PADDING * 2)
-                        .h(size.height - Self::IMAGE_PADDING * 2)
                         .rounded_md()
-                        .overflow_hidden(),
+                        .overflow_hidden()
+                        .with_animation(
+                            SharedString::from(src),
+                            Animation::new(Duration::from_millis(500)).with_easing(ease_in_out),
+                            {
+                                let height = size.height;
+                                move |this, delta| {
+                                    this.h((height - Self::IMAGE_PADDING * 2) * delta)
+                                }
+                            },
+                        ),
                 )
                 .on_mouse_down(MouseButton::Left, |_event, cx| {
                     cx.update_global::<AppState, ()>(|app_state, cx| {
