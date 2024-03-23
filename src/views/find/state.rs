@@ -135,10 +135,6 @@ pub enum StateMachine {
 }
 
 impl StateMachine {
-    pub fn reset(&mut self) {
-        *self = Self::LoadPage(1);
-    }
-
     pub fn idle(&mut self) {
         match self {
             Self::Idle | Self::LoadPage(_) | Self::PageError(_) | Self::LoadDetail(_, _) => {}
