@@ -8,6 +8,7 @@ use super::home::Home;
 use super::like::Like;
 use super::tab::{Tab, TabItem};
 use super::talk::Talk;
+use super::xiuren::Xiuren;
 use crate::app_state::AppState;
 use crate::theme::Theme;
 
@@ -18,6 +19,7 @@ pub struct Javdesk {
     talk: View<Talk>,
     find: View<Find>,
     like: View<Like>,
+    xiuren: View<Xiuren>,
 }
 
 impl Javdesk {
@@ -30,6 +32,7 @@ impl Javdesk {
         let talk = cx.new_view(|_| Talk);
         let find = cx.new_view(|_| Find);
         let like = cx.new_view(|_| Like);
+        let xiuren = cx.new_view(|_| Xiuren);
 
         cx.new_view(|_| Self {
             selected,
@@ -38,6 +41,7 @@ impl Javdesk {
             talk,
             find,
             like,
+            xiuren,
         })
     }
 
@@ -59,6 +63,7 @@ impl Render for Javdesk {
             TabItem::Talk => view.child(self.talk.clone()),
             TabItem::Find => view.child(self.find.clone()),
             TabItem::Like => view.child(self.like.clone()),
+            TabItem::Xiuren => view.child(self.xiuren.clone()),
         };
 
         div()

@@ -39,6 +39,7 @@ pub enum IconName {
     Reply,
     Like,
     Delete,
+    Xiuren,
 }
 
 impl IconName {
@@ -56,6 +57,7 @@ impl IconName {
             Self::Reply => "icons/reply.svg",
             Self::Like => "icons/like.svg",
             Self::Delete => "icons/delete.svg",
+            Self::Xiuren => "icons/xiuren.svg",
         }
     }
 }

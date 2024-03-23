@@ -1,7 +1,3 @@
-import requests
-import os
-import json
-
 param = """MIME类型: application/x-www-form-urlencoded; charset=UTF-8
 lang: en_US
 action: jnews_module_ajax_jnews_block_15
@@ -424,7 +420,7 @@ data[attribute][hide_mobile]
 data[attribute][paged]: 1
 data[attribute][column_class]: jeg_col_3o3
 data[attribute][class]: jnews_block_15"""
-OUT_FILE = "xiuren.body"
+OUT_FILE = "xiuren.struct"
 
 def parse_int(s: str):
     if len(s) == 0:
@@ -450,9 +446,55 @@ def parse(lines: list[str]):
                 json_map[key] = ("str", value)
             else:
                 json_map[key] = ("num", number)
+    
+    lines = []
+    lines.append("#[derive(Serialize, Debug)]")
+    lines.append("struct Body<'a> {")
+    count = 0
+    for item in json_map.items():
+        key = item[0]
+        value = item[1]
+        
+        if key == "data[current_page]":
+            lines.append("    page: i32,")
+            continue
             
-    with open(OUT_FILE, "w+") as f:
-        f.write(json.dumps(json_map))
+        count += 1
+        lines.append(f"    #[serde(rename = \"{key}\")]")
+        if value is None:
+            lines.append(f"    param_{count}: &'a str,")
+        else:
+            if value[0] == "str":
+                lines.append(f"    param_{count}: &'a str,")
+            else:
+                lines.append(f"    param_{count}: i32,")
+    lines.append("}")
+    lines.append("impl<'a> Body<'a> {")
+    lines.append("    fn new(page: i32) -> Self {")
+    lines.append("        Self {")
+    count = 0
+    for item in json_map.items():
+        key = item[0]
+        value = item[1]
+        
+        if key == "data[current_page]":
+            lines.append("            page,")
+            continue
+            
+        count += 1
+        if value is None:
+            lines.append(f"            param_{count}: \"\",")
+        else:
+            if value[0] == "str":
+                lines.append(f"            param_{count}: \"{value[1]}\",")
+            else:
+                lines.append(f"            param_{count}: {value[1]},")
+    lines.append("        }")
+    lines.append("    }")
+    lines.append("}")
+            
+    with open(OUT_FILE, "w") as f:
+        f.write("\n".join(lines))
 
 lines = []
 lines.extend(param.split("\n"))

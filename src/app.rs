@@ -6,7 +6,7 @@ use crate::config::Config;
 use crate::db::DB;
 use crate::proxy::Proxy;
 use crate::theme::Theme;
-use crate::views::{Find, Home, Javdesk, Like, Talk};
+use crate::views::{Find, Home, Javdesk, Like, Talk, Xiuren};
 
 pub const NAME: &str = "javdesk";
 
@@ -32,6 +32,7 @@ pub fn run_app(app: App) {
                 Talk::init(cx);
                 Find::init(cx);
                 Like::init(cx);
+                Xiuren::init(cx);
                 let javdesk = Javdesk::new(cx);
 
                 cx.on_window_should_close({
@@ -44,6 +45,7 @@ pub fn run_app(app: App) {
                         Talk::reset(cx);
                         Find::reset(cx);
                         Like::reset(cx);
+                        Xiuren::reset(cx);
                         if let Some(javdesk) = javdesk.upgrade() {
                             cx.update_view(&javdesk, |javdesk, cx| {
                                 javdesk.reset(cx);
