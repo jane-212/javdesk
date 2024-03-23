@@ -8,7 +8,7 @@ APP_PATH="${APPLICATIONS_PATH}/${APP_NAME}.app"
 if [[ -e ${APP_PATH} ]]
 then
     echo "file ${APP_PATH} exists"
-    rm ${APP_PATH}
+    rm -r ${APP_PATH}
     echo "file ${APP_PATH} removed"
 fi
 
