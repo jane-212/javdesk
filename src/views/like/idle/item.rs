@@ -47,10 +47,15 @@ impl RenderOnce for Item {
                     .h_full()
                     .rounded_lg()
                     .child(
-                        div()
-                            .h_full()
-                            .w_1_5()
-                            .child(img(self.cover).size_full().rounded_md().overflow_hidden()),
+                        div().h_full().w_1_5().child(
+                            img(self.cover)
+                                .size_full()
+                                .rounded_md()
+                                .overflow_hidden()
+                                .border_1()
+                                .border_color(theme.border)
+                                .object_fit(ObjectFit::Cover),
+                        ),
                     )
                     .child(
                         div()

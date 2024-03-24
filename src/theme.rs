@@ -16,8 +16,8 @@ impl Theme {
         Self {
             background: rgb(0x363433).into(),
             main: rgb(0xffc90c).into(),
-            text: rgb(0xe3bd8d).into(),
-            icon: rgb(0xe3bd8d).into(),
+            text: rgb(0xeeeeee).into(),
+            icon: rgb(0xeeeeee).into(),
             hover_background: rgb(0x80766e).into(),
             border: rgb(0x80766e).into(),
             name: rgb(0x51c4d3).into(),

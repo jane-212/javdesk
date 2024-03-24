@@ -28,13 +28,7 @@ impl Info {
                         div()
                             .h_full()
                             .w_2_3()
-                            .child(
-                                img(src.clone())
-                                    .size_full()
-                                    .rounded_md()
-                                    .overflow_hidden()
-                                    .object_fit(ObjectFit::Contain),
-                            )
+                            .child(img(src.clone()).size_full().rounded_md().overflow_hidden())
                             .on_mouse_down(MouseButton::Left, {
                                 move |_event, cx| {
                                     let src = src.clone();

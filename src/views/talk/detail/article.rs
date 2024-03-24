@@ -181,6 +181,8 @@ impl RenderOnce for Article {
                                     .size(Self::USER_HEIGHT)
                                     .rounded_full()
                                     .object_fit(ObjectFit::Fill)
+                                    .border_1()
+                                    .border_color(theme.border)
                                     .overflow_hidden(),
                                 #[cfg(not(feature = "avatar"))]
                                 div(),
@@ -322,7 +324,9 @@ impl RenderOnce for Reply {
                     .min_w_6()
                     .rounded_full()
                     .overflow_hidden()
-                    .object_fit(ObjectFit::Fill),
+                    .object_fit(ObjectFit::Fill)
+                    .border_1()
+                    .border_color(theme.border),
                 #[cfg(not(feature = "avatar"))]
                 div(),
             )

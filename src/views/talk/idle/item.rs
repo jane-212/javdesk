@@ -77,6 +77,8 @@ impl RenderOnce for Item {
                                     .child(
                                         img(self.avatar)
                                             .object_fit(ObjectFit::Fill)
+                                            .border_1()
+                                            .border_color(theme.border)
                                             .size_16()
                                             .rounded_full()
                                             .overflow_hidden(),

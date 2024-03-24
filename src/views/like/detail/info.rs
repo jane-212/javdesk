@@ -40,11 +40,15 @@ impl Info {
                 let mut child = Vec::new();
                 for sample in samples.clone() {
                     child.push(
-                        div()
-                            .p_4()
-                            .w_1_4()
-                            .h(Self::SAMPLE_HEIGHT)
-                            .child(img(sample).size_full().rounded_md().overflow_hidden()),
+                        div().p_4().w_1_4().h(Self::SAMPLE_HEIGHT).child(
+                            img(sample)
+                                .size_full()
+                                .rounded_md()
+                                .overflow_hidden()
+                                .border_1()
+                                .border_color(theme.border)
+                                .object_fit(ObjectFit::Cover),
+                        ),
                     );
 
                     if child.len() == Self::FOLD {
@@ -75,7 +79,10 @@ impl Info {
                                         img(cover.clone())
                                             .size_full()
                                             .rounded_md()
-                                            .overflow_hidden(),
+                                            .overflow_hidden()
+                                            .border_1()
+                                            .border_color(theme.border)
+                                            .object_fit(ObjectFit::Cover),
                                     )
                                     .on_mouse_down(MouseButton::Left, move |_event, cx| {
                                         let cover = cover.clone();

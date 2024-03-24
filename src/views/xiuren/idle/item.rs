@@ -49,8 +49,10 @@ impl RenderOnce for Item {
                                 img(self.cover)
                                     .rounded_md()
                                     .overflow_hidden()
+                                    .border_1()
+                                    .border_color(theme.border)
                                     .size_full()
-                                    .object_fit(ObjectFit::Fill),
+                                    .object_fit(ObjectFit::Cover),
                             ),
                         ),
                     )
