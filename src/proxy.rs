@@ -1,5 +1,7 @@
+use std::io::Cursor;
 use std::sync::OnceLock;
 
+use ::image::io::Reader as ImageReader;
 use actix_web::{
     get, middleware,
     web::{self, Data},
@@ -37,6 +39,7 @@ impl Proxy {
             App::new()
                 .app_data(state.clone())
                 .service(image)
+                .service(image_transcode)
                 .wrap(middleware::Logger::default())
         })
         .disable_signals()
@@ -84,11 +87,46 @@ async fn image(param: web::Query<Param>, state: web::Data<State>) -> impl Respon
     HttpResponse::Ok().body(bytes)
 }
 
+#[get("/image/transcode")]
+async fn image_transcode(param: web::Query<Param>, state: web::Data<State>) -> impl Responder {
+    let Ok(bytes) = state
+        .client
+        .get(&param.src)
+        .send()
+        .await
+        .map(|res| res.bytes())
+    else {
+        return HttpResponse::NotFound().body("error");
+    };
+
+    let Ok(bytes) = bytes.await else {
+        return HttpResponse::NotFound().body("error");
+    };
+
+    let Ok(bytes) = webp_2_jpg(bytes.to_vec()).await else {
+        return HttpResponse::NotFound().body("error");
+    };
+
+    HttpResponse::Ok().body(bytes)
+}
+
+async fn webp_2_jpg(bytes: Vec<u8>) -> anyhow::Result<Vec<u8>> {
+    let img = ImageReader::new(Cursor::new(bytes))
+        .with_guessed_format()?
+        .decode()?;
+
+    let mut bytes: Vec<u8> = Vec::new();
+    img.write_to(&mut Cursor::new(&mut bytes), ::image::ImageFormat::Jpeg)?;
+
+    Ok(bytes)
+}
+
 pub enum ProxyUrl {
     Home(String),
     #[cfg(feature = "avatar")]
     Avatar(String),
     Talk(String),
+    Webp(String),
 }
 
 impl ToString for ProxyUrl {
@@ -98,6 +136,9 @@ impl ToString for ProxyUrl {
             #[cfg(feature = "avatar")]
             ProxyUrl::Avatar(src) => format!("http://127.0.0.1:8888/image?t=avatar&src={}", src),
             ProxyUrl::Talk(src) => format!("http://127.0.0.1:8888/image?t=talk&src={}", src),
+            ProxyUrl::Webp(src) => {
+                format!("http://127.0.0.1:8888/image/transcode?t=webp&src={}", src)
+            }
         }
     }
 }

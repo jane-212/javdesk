@@ -4,6 +4,8 @@ use scraper::Html;
 mod info;
 mod selector;
 
+use crate::proxy::ProxyUrl;
+
 use super::State;
 use info::Info;
 use selector::selectors;
@@ -31,7 +33,12 @@ impl Detail {
 
         let images = html
             .select(&selectors().image)
-            .flat_map(|image| image.attr("src").map(|src| src.to_string()))
+            .skip(1)
+            .flat_map(|image| {
+                image
+                    .attr("src")
+                    .map(|src| ProxyUrl::Webp(src.to_string()).to_string())
+            })
             .collect();
 
         Some(Info::new(title, images))

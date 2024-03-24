@@ -12,6 +12,7 @@ anyhow = "1.0.81"
 async-std = { version = "1.12.0", features = ["tokio1"] }
 env_logger = "0.11.3"
 gpui = { git = "https://github.com/zed-industries/zed" }
+image = "0.25.0"
 isahc = "1.7.2"
 jemallocator = "0.5.4"
 log = "0.4.21"

@@ -10,7 +10,7 @@ pub struct Info {
 }
 
 impl Info {
-    const HEIGHT: Pixels = Pixels(800.0);
+    const HEIGHT: Pixels = Pixels(1200.0);
 
     pub fn new(title: String, images: Vec<String>) -> Self {
         let list_state = ListState::new(images.len(), ListAlignment::Top, Pixels(0.0), {
