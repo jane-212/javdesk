@@ -53,7 +53,7 @@ impl Xiuren {
             .await
         });
         cx.spawn(|_view, mut cx| async move {
-            let Some((prev, next, items)) = task_handle.await else {
+            let Some((next, items)) = task_handle.await else {
                 cx.update_global::<State, ()>(|state, cx| {
                     state.machine_mut().page_error(page);
                     cx.refresh();
@@ -74,8 +74,9 @@ impl Xiuren {
 
             cx.update_global::<State, ()>(|state, cx| {
                 state.page_mut().to(page);
-                state.page_mut().set_prev(prev);
-                state.page_mut().set_next(next);
+                state
+                    .page_mut()
+                    .set_high(if next { page + 1 } else { page });
                 state.idle_mut().change_to(items, cx);
                 state.machine_mut().idle();
                 cx.refresh();

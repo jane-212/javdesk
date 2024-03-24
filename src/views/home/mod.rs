@@ -72,8 +72,7 @@ impl Home {
 
             cx.update_global::<State, ()>(|state, cx| {
                 state.page_mut().to(page);
-                state.page_mut().set_low(low);
-                state.page_mut().set_high(high);
+                state.page_mut().set(low, high);
                 state.idle_mut().change_to(items, cx);
                 state.machine_mut().idle();
                 cx.refresh();

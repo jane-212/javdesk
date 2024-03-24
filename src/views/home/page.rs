@@ -12,6 +12,7 @@ pub struct Page {
     current: i32,
     low: i32,
     high: i32,
+    pages: Vec<PageItem>,
 }
 
 impl Page {
@@ -20,6 +21,7 @@ impl Page {
             current: 1,
             low: 1,
             high: 1,
+            pages: Vec::new(),
         }
     }
 
@@ -27,12 +29,11 @@ impl Page {
         self.current = page;
     }
 
-    pub fn set_low(&mut self, low: i32) {
+    pub fn set(&mut self, low: i32, high: i32) {
         self.low = low;
-    }
-
-    pub fn set_high(&mut self, high: i32) {
         self.high = high;
+        self.pages.clear();
+        self.pages.append(&mut self.pages());
     }
 
     fn pages(&self) -> Vec<PageItem> {
@@ -41,9 +42,10 @@ impl Page {
         for i in self.low..=self.high {
             if i == self.current {
                 pages.push(PageItem::Current(i));
-            } else {
-                pages.push(PageItem::Normal(i));
+                continue;
             }
+
+            pages.push(PageItem::Normal(i));
         }
 
         pages
@@ -52,8 +54,6 @@ impl Page {
 
 impl RenderOnce for Page {
     fn render(self, _cx: &mut WindowContext) -> impl IntoElement {
-        let pages = self.pages();
-
         div()
             .w(SIZE + PADDING * 2)
             .h_full()
@@ -63,13 +63,13 @@ impl RenderOnce for Page {
             .child(
                 div()
                     .w(SIZE)
-                    .h(pages.len() as f32 * (SIZE + MARGIN))
-                    .children(pages),
+                    .h(self.pages.len() as f32 * (SIZE + MARGIN))
+                    .children(self.pages),
             )
     }
 }
 
-#[derive(IntoElement)]
+#[derive(IntoElement, Clone)]
 pub enum PageItem {
     Current(i32),
     Normal(i32),

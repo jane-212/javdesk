@@ -10,16 +10,18 @@ const MARGIN: Pixels = Pixels(8.0);
 #[derive(IntoElement, Clone)]
 pub struct Page {
     current: i32,
-    prev: bool,
-    next: bool,
+    high: i32,
+    pages: Vec<PageItem>,
 }
 
 impl Page {
+    const RANGE: i32 = 5;
+
     pub fn new() -> Self {
         Self {
             current: 1,
-            prev: false,
-            next: false,
+            high: 1,
+            pages: Vec::new(),
         }
     }
 
@@ -27,23 +29,40 @@ impl Page {
         self.current = page;
     }
 
-    pub fn set_prev(&mut self, prev: bool) {
-        self.prev = prev;
-    }
-
-    pub fn set_next(&mut self, next: bool) {
-        self.next = next;
+    pub fn set_high(&mut self, high: i32) {
+        self.high = high;
+        self.pages.clear();
+        self.pages.append(&mut self.pages());
     }
 
     fn pages(&self) -> Vec<PageItem> {
         let mut pages = Vec::new();
 
-        if self.prev {
-            pages.push(PageItem::Prev(self.current - 1));
-        }
+        for i in 1..=self.high {
+            if i == self.current {
+                pages.push(PageItem::Current(i));
+                continue;
+            }
 
-        if self.next {
-            pages.push(PageItem::Next(self.current + 1));
+            if i == 1 {
+                pages.push(PageItem::Normal(i));
+                if self.current - 1 > Self::RANGE {
+                    pages.push(PageItem::Dot);
+                }
+                continue;
+            }
+
+            if i == self.high {
+                if self.high - self.current > Self::RANGE {
+                    pages.push(PageItem::Dot);
+                }
+                pages.push(PageItem::Normal(i));
+                continue;
+            }
+
+            if (self.current - i).abs() < Self::RANGE {
+                pages.push(PageItem::Normal(i));
+            }
         }
 
         pages
@@ -52,8 +71,6 @@ impl Page {
 
 impl RenderOnce for Page {
     fn render(self, _cx: &mut WindowContext) -> impl IntoElement {
-        let pages = self.pages();
-
         div()
             .w(SIZE + PADDING * 2)
             .h_full()
@@ -63,16 +80,17 @@ impl RenderOnce for Page {
             .child(
                 div()
                     .w(SIZE)
-                    .h(pages.len() as f32 * (SIZE + MARGIN))
-                    .children(pages),
+                    .h(self.pages.len() as f32 * (SIZE + MARGIN))
+                    .children(self.pages),
             )
     }
 }
 
-#[derive(IntoElement)]
+#[derive(IntoElement, Clone)]
 pub enum PageItem {
-    Prev(i32),
-    Next(i32),
+    Current(i32),
+    Dot,
+    Normal(i32),
 }
 
 impl RenderOnce for PageItem {
@@ -87,8 +105,9 @@ impl RenderOnce for PageItem {
             .rounded_lg()
             .mt(MARGIN);
         match self {
-            PageItem::Prev(page) => view
-                .child("<")
+            PageItem::Current(page) => view.text_color(theme.main).child(page.to_string()),
+            PageItem::Normal(page) => view
+                .child(page.to_string())
                 .hover(|s| s.bg(theme.hover_background))
                 .on_mouse_down(MouseButton::Left, move |_event, cx| {
                     cx.update_global::<State, ()>(|state, cx| {
@@ -96,15 +115,7 @@ impl RenderOnce for PageItem {
                         cx.refresh();
                     });
                 }),
-            PageItem::Next(page) => view
-                .child(">")
-                .hover(|s| s.bg(theme.hover_background))
-                .on_mouse_down(MouseButton::Left, move |_event, cx| {
-                    cx.update_global::<State, ()>(|state, cx| {
-                        state.machine_mut().load_page(page);
-                        cx.refresh();
-                    });
-                }),
+            PageItem::Dot => view.child("..."),
         }
     }
 }

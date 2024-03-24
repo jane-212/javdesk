@@ -51,7 +51,7 @@ impl Idle {
         ));
     }
 
-    pub fn parse(res: Response) -> (bool, bool, Vec<Item>) {
+    pub fn parse(res: Response) -> (bool, Vec<Item>) {
         let html = Html::parse_document(&res.content.replace("\\\"", "\""));
 
         let mut items = Vec::new();
@@ -113,7 +113,7 @@ impl Idle {
             items.push(Item::new(href, cover, title, view, date));
         });
 
-        (res.prev, res.next, items)
+        (res.next, items)
     }
 }
 
