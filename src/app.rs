@@ -33,37 +33,39 @@ pub fn run_app(app: App) {
                 Find::init(cx);
                 Like::init(cx);
                 Xiuren::init(cx);
-                
+                let javdesk = Javdesk::new(cx);
+
                 #[cfg(feature = "hide")]
-                {
-                    let javdesk = Javdesk::new(cx);
-                    cx.on_window_should_close({
-                        let javdesk = javdesk.downgrade();
-                        move |cx| {
-                            cx.hide();
-                            Config::reload(cx);
-                            AppState::reset(cx);
-                            Home::reset(cx);
-                            Talk::reset(cx);
-                            Find::reset(cx);
-                            Like::reset(cx);
-                            Xiuren::reset(cx);
-                            if let Some(javdesk) = javdesk.upgrade() {
-                                cx.update_view(&javdesk, |javdesk, cx| {
-                                    javdesk.reset(cx);
-                                });
-                            }
-                            cx.refresh();
-    
-                            false
+                cx.on_window_should_close({
+                    let javdesk = javdesk.downgrade();
+                    move |cx| {
+                        cx.hide();
+                        Config::reload(cx);
+                        AppState::reset(cx);
+                        Home::reset(cx);
+                        Talk::reset(cx);
+                        Find::reset(cx);
+                        Like::reset(cx);
+                        Xiuren::reset(cx);
+                        if let Some(javdesk) = javdesk.upgrade() {
+                            cx.update_view(&javdesk, |javdesk, cx| {
+                                javdesk.reset(cx);
+                            });
                         }
-                    });
-                    
-                    javdesk
-                }
-                
+                        cx.refresh();
+
+                        false
+                    }
+                });
+
                 #[cfg(not(feature = "hide"))]
-                Javdesk::new(cx)
+                cx.on_window_should_close(|cx| {
+                    cx.quit();
+
+                    true
+                });
+
+                javdesk
             },
         );
     });
