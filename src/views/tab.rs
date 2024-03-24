@@ -72,6 +72,7 @@ impl Tab {
 impl Render for Tab {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         let tabs = Self::tabs(self.selected.clone(), cx);
+        let theme = cx.global::<Theme>();
 
         div()
             .h_full()
@@ -79,6 +80,8 @@ impl Render for Tab {
             .flex()
             .justify_center()
             .items_center()
+            .border_r_1()
+            .border_color(theme.border)
             .child(
                 div()
                     .w_full()
