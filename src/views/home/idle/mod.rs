@@ -81,7 +81,7 @@ impl Idle {
             let Some(title) = item
                 .select(&selectors().title)
                 .next()
-                .and_then(|cover| cover.attr("title").map(|title| title.to_string()))
+                .and_then(|title| title.attr("title").map(|title| title.to_string()))
             else {
                 return;
             };

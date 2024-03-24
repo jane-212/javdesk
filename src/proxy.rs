@@ -149,11 +149,6 @@ fn headers(t: &str) -> &'static HeaderMap {
             CLIENT.get_or_init(|| {
                 let mut headers = HeaderMap::new();
                 headers.insert(header::USER_AGENT, HeaderValue::from_static("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15"));
-                headers.insert(
-                    header::REFERER,
-                    HeaderValue::from_static("https://www.javbus.com/"),
-                );
-                headers.insert(header::HOST, HeaderValue::from_static("www.javbus.com"));
                 headers
             })
         }

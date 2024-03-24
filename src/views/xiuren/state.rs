@@ -9,7 +9,6 @@ use reqwest::{
 use super::detail::Detail;
 use super::idle::Idle;
 use super::page::Page;
-use crate::config::Config;
 
 pub struct State {
     client: Client,
@@ -22,30 +21,12 @@ pub struct State {
 impl State {
     pub fn new(cx: &mut WindowContext) -> Self {
         let mut headers = HeaderMap::new();
-        headers.insert(
-            header::ACCEPT_ENCODING,
-            HeaderValue::from_static("gzip, deflate, br"),
-        );
         headers.insert(header::USER_AGENT, HeaderValue::from_static("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15"));
-        headers.insert(header::HOST, HeaderValue::from_static("www.javbus.com"));
-        headers.insert(
-            header::ACCEPT,
-            HeaderValue::from_static(
-                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            ),
-        );
-        headers.insert(
-            header::ACCEPT_LANGUAGE,
-            HeaderValue::from_static("zh-CN,zh-Hans;q=0.9"),
-        );
-        let proxy = cx.global::<Config>().proxy.clone();
-        let mut client_builder = ClientBuilder::new()
+        let client = ClientBuilder::new()
             .timeout(Duration::from_secs(5))
-            .default_headers(headers);
-        if let Some(proxy) = proxy.and_then(|proxy| reqwest::Proxy::https(proxy).ok()) {
-            client_builder = client_builder.proxy(proxy);
-        }
-        let client = client_builder.build().expect("build http client failed");
+            .default_headers(headers)
+            .build()
+            .expect("build http client failed");
 
         let current_page = 1;
         let mut page = Page::new();
@@ -104,7 +85,7 @@ impl State {
 
     pub fn title(&self) -> String {
         match self.state_machine {
-            StateMachine::Idle => "Home".to_string(),
+            StateMachine::Idle => "Xiuren".to_string(),
             StateMachine::Detail => self.detail.title(),
             StateMachine::LoadPage(_) => "Loading".to_string(),
             StateMachine::LoadDetail(_) => "Loading".to_string(),

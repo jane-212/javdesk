@@ -3,12 +3,8 @@ use std::sync::OnceLock;
 use scraper::Selector;
 
 pub struct Selectors {
-    pub cover: Selector,
+    pub image: Selector,
     pub title: Selector,
-    pub date: Selector,
-    pub id: Selector,
-    pub cost: Selector,
-    pub samples: Selector,
 }
 
 macro_rules! selector {
@@ -20,14 +16,8 @@ macro_rules! selector {
 impl Selectors {
     fn new() -> Self {
         Self {
-            cover: selector!("body>div.container>div.movie>div.screencap>a.bigImage>img"),
-            title: selector!("body>div.container>div.movie>div.screencap>a.bigImage>img"),
-            id: selector!("body>div.container>div.movie>div.info>p>span"),
-            date: selector!("body>div.container>div.movie>div.info>p"),
-            cost: selector!("body>div.container>div.movie>div.info>p"),
-            samples: selector!(
-                "body>div.container>div#sample-waterfall>a.sample-box>div.photo-frame>img"
-            ),
+            title: selector!("body>div.jeg_viewport>div.post-wrapper>div.post-wrap>div.jeg_main>div.jeg_container>div.jeg_content>div.container>div.entry-header>h1.jeg_post_title"),
+            image: selector!("body>div.jeg_viewport>div.post-wrapper>div.post-wrap>div.jeg_main>div.jeg_container>div.jeg_content>div.container>div.row>div.jeg_main_content>div.jeg_inner_content>div.entry-content>div.content-inner>p>a>img"),
         }
     }
 }

@@ -455,12 +455,12 @@ def parse(lines: list[str]):
         key = item[0]
         value = item[1]
         
+        lines.append(f"    #[serde(rename = \"{key}\")]")
         if key == "data[current_page]":
             lines.append("    page: i32,")
             continue
             
         count += 1
-        lines.append(f"    #[serde(rename = \"{key}\")]")
         if value is None:
             lines.append(f"    param_{count}: &'a str,")
         else:

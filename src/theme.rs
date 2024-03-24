@@ -8,6 +8,7 @@ pub struct Theme {
     pub hover_background: Hsla,
     pub border: Hsla,
     pub name: Hsla,
+    pub overlay: Hsla,
 }
 
 impl Theme {
@@ -20,6 +21,7 @@ impl Theme {
             hover_background: rgb(0x80766e).into(),
             border: rgb(0x80766e).into(),
             name: rgb(0x51c4d3).into(),
+            overlay: rgba(0x00000055).into(),
         }
     }
 

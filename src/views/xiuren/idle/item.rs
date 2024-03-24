@@ -14,7 +14,7 @@ pub struct Item {
 }
 
 impl Item {
-    const HEIGHT: Pixels = Pixels(200.0);
+    const HEIGHT: Pixels = Pixels(400.0);
 
     pub fn new(href: String, cover: String, title: String, view: i32, date: String) -> Self {
         Self {
@@ -39,75 +39,75 @@ impl RenderOnce for Item {
             .h(Self::HEIGHT)
             .child(
                 div()
-                    .flex()
-                    .p_4()
-                    .w_2_3()
+                    .p_6()
+                    .w_1_2()
                     .h_full()
                     .rounded_lg()
                     .child(
-                        div().h_full().w_1_5().child(
-                            img(self.cover.clone())
+                        div().absolute().top_0().left_0().size_full().p_4().child(
+                            div().size_full().child(
+                                img(self.cover)
+                                    .rounded_md()
+                                    .overflow_hidden()
+                                    .size_full()
+                                    .object_fit(ObjectFit::Fill),
+                            ),
+                        ),
+                    )
+                    .child(
+                        div().absolute().top_0().left_0().size_full().p_4().child(
+                            div()
                                 .size_full()
                                 .rounded_md()
-                                .overflow_hidden(),
+                                .overflow_hidden()
+                                .bg(theme.overlay),
                         ),
                     )
                     .child(
                         div()
-                            .h_full()
-                            .w_4_5()
-                            .p_2()
+                            .font_weight(FontWeight::BOLD)
+                            .h_1_5()
+                            .w_full()
+                            .overflow_hidden()
+                            .child(self.title),
+                    )
+                    .child(
+                        div()
+                            .h_1_5()
+                            .w_full()
+                            .flex()
+                            .justify_center()
+                            .items_center()
                             .child(
                                 div()
-                                    .font_weight(FontWeight::BOLD)
-                                    .h_4_5()
-                                    .w_full()
-                                    .overflow_hidden()
+                                    .flex()
+                                    .w_1_2()
+                                    .h_full()
                                     .child(
-                                        self.title
-                                            .lines()
-                                            .flat_map(|line| line.chars())
-                                            .collect::<String>(),
-                                    ),
+                                        div()
+                                            .mr_2()
+                                            .size_6()
+                                            .child(Icon::new(IconName::View, true)),
+                                    )
+                                    .child(self.view.to_string()),
                             )
                             .child(
                                 div()
-                                    .h_1_5()
-                                    .w_full()
                                     .flex()
-                                    .justify_center()
-                                    .items_center()
+                                    .w_1_2()
+                                    .h_full()
                                     .child(
                                         div()
-                                            .flex()
-                                            .w_1_2()
-                                            .h_full()
-                                            .child(
-                                                div()
-                                                    .mr_2()
-                                                    .size_6()
-                                                    .child(Icon::new(IconName::View, true)),
-                                            )
-                                            .child(self.view.to_string()),
+                                            .mr_2()
+                                            .size_6()
+                                            .child(Icon::new(IconName::Date, true)),
                                     )
-                                    .child(
-                                        div()
-                                            .flex()
-                                            .w_1_2()
-                                            .h_full()
-                                            .child(
-                                                div()
-                                                    .mr_2()
-                                                    .size_6()
-                                                    .child(Icon::new(IconName::Date, true)),
-                                            )
-                                            .child(self.date.clone()),
-                                    ),
+                                    .child(self.date),
                             ),
                     )
                     .hover(|s| s.bg(theme.hover_background))
                     .on_mouse_down(MouseButton::Left, {
-                        let href = self.href.clone();
+                        let href = self.href;
                         move |_event, cx| {
                             cx.update_global::<State, ()>(|state, cx| {
                                 state.machine_mut().load_detail(href.clone());

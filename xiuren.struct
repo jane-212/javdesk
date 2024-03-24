@@ -12,6 +12,7 @@ struct Body<'a> {
     param_5: i32,
     #[serde(rename = "data[filter_type]")]
     param_6: &'a str,
+    #[serde(rename = "data[current_page]")]
     page: i32,
     #[serde(rename = "data[attribute][header_icon]")]
     param_7: &'a str,

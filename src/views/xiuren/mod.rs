@@ -1,5 +1,6 @@
 use async_std::task;
 use gpui::*;
+use serde::Serialize;
 
 mod detail;
 mod idle;
@@ -12,11 +13,11 @@ use detail::Detail;
 use idle::Idle;
 use state::{State, StateMachine};
 
+include!("../../../xiuren.struct");
+
 pub struct Xiuren;
 
 impl Xiuren {
-    const BASE_URL: &'static str = "https://www.javbus.com";
-
     pub fn init(cx: &mut WindowContext) {
         let state = State::new(cx);
         cx.set_global(state);
@@ -41,12 +42,13 @@ impl Xiuren {
         let client = cx.global::<State>().client().clone();
         let task_handle = cx.background_executor().spawn(async move {
             task::spawn(async move {
-                let url = format!("{}/page/{}", Self::BASE_URL, page);
-                let Ok(res) = client.get(url).send().await else {
+                let url = "https://xiuren.biz/?ajax-request=jnews";
+                let body = Body::new(page);
+                let Ok(res) = client.post(url).form(&body).send().await else {
                     return None;
                 };
 
-                res.text().await.ok().map(Idle::parse)
+                res.json::<idle::Response>().await.ok().map(Idle::parse)
             })
             .await
         });
@@ -84,7 +86,6 @@ impl Xiuren {
     }
 
     fn load_detail(cx: &mut ViewContext<Self>, href: String) {
-        return;
         cx.spawn(|_view, mut cx| async move {
             cx.update_global::<State, ()>(|state, cx| {
                 state.machine_mut().loading();
@@ -119,7 +120,7 @@ impl Xiuren {
                 return;
             };
 
-            let Some(info) = Detail::parse(doc, href.clone()) else {
+            let Some(info) = Detail::parse(doc) else {
                 cx.update_global::<State, ()>(|state, cx| {
                     state.machine_mut().detail_error(href);
                     cx.refresh();

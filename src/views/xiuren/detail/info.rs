@@ -1,210 +1,56 @@
 use gpui::*;
 
 use super::State;
-use crate::{
-    app_state::AppState,
-    components::{Icon, IconName, Scroll},
-    db::DB,
-    theme::Theme,
-    views::like,
-};
+use crate::{app_state::AppState, components::Scroll};
 
 #[derive(IntoElement, Clone)]
 pub struct Info {
-    id: String,
+    title: String,
     scroll: Scroll,
 }
 
 impl Info {
-    const TITLE_HEIGHT: Pixels = Pixels(90.0);
-    const INFO_HEIGHT: Pixels = Pixels(30.0);
-    const COVER_HEIGHT: Pixels = Pixels(500.0);
-    const SAMPLE_HEIGHT: Pixels = Pixels(200.0);
-    const PADDING: Pixels = Pixels(10.0);
-    const FOLD: usize = 4;
+    const HEIGHT: Pixels = Pixels(800.0);
 
-    #[allow(clippy::too_many_arguments)]
-    pub fn new(
-        title: String,
-        id: String,
-        cover: String,
-        date: String,
-        cost: i32,
-        samples: Vec<String>,
-        href: String,
-    ) -> Self {
-        let list_state = ListState::new(1, ListAlignment::Top, Pixels(0.0), {
-            let id = id.clone();
-
-            move |_i, cx| {
-                let theme = cx.global::<Theme>();
-                let cover = cover.clone();
-                let mut new_samples = Vec::new();
-                let mut child = Vec::new();
-                for sample in samples.clone() {
-                    child.push(
-                        div()
-                            .p_4()
-                            .w_1_4()
-                            .h(Self::SAMPLE_HEIGHT)
-                            .child(img(sample).size_full().rounded_md().overflow_hidden()),
-                    );
-
-                    if child.len() == Self::FOLD {
-                        new_samples.push(child);
-                        child = Vec::new();
-                    }
-                }
-                if !child.is_empty() {
-                    new_samples.push(child);
-                }
+    pub fn new(title: String, images: Vec<String>) -> Self {
+        let list_state = ListState::new(images.len(), ListAlignment::Top, Pixels(0.0), {
+            move |i, _| {
+                let src = images[i].to_string();
 
                 div()
-                    .h_full()
                     .w_full()
+                    .h(Self::HEIGHT)
                     .flex()
                     .justify_center()
                     .items_center()
+                    .p_2()
                     .child(
                         div()
                             .h_full()
                             .w_2_3()
                             .child(
-                                div()
-                                    .w_full()
-                                    .h(Self::COVER_HEIGHT)
-                                    .pt_2()
-                                    .child(
-                                        img(cover.clone())
-                                            .size_full()
-                                            .rounded_md()
-                                            .overflow_hidden(),
-                                    )
-                                    .on_mouse_down(MouseButton::Left, {
-                                        let cover = cover.clone();
-                                        move |_event, cx| {
-                                            let cover = cover.clone();
-                                            cx.update_global::<AppState, ()>(
-                                                move |app_state, cx| {
-                                                    app_state.open(cover);
-                                                    cx.refresh();
-                                                },
-                                            );
-                                        }
-                                    }),
-                            )
-                            .child(
-                                div()
+                                img(src.clone())
+                                    .size_full()
+                                    .rounded_md()
                                     .overflow_hidden()
-                                    .w_full()
-                                    .font_weight(FontWeight::BOLD)
-                                    .h(Self::TITLE_HEIGHT)
-                                    .p_2()
-                                    .child(title.clone()),
+                                    .object_fit(ObjectFit::Contain),
                             )
-                            .child(
-                                div()
-                                    .flex()
-                                    .w_full()
-                                    .h(Self::INFO_HEIGHT * 3)
-                                    .child(
-                                        div()
-                                            .w_4_5()
-                                            .h_full()
-                                            .child(
-                                                div()
-                                                    .w_full()
-                                                    .h_1_3()
-                                                    .flex()
-                                                    .p_2()
-                                                    .child(
-                                                        div()
-                                                            .mr_2()
-                                                            .size_6()
-                                                            .child(Icon::new(IconName::ID, true)),
-                                                    )
-                                                    .child(id.clone()),
-                                            )
-                                            .child(
-                                                div()
-                                                    .w_full()
-                                                    .h_1_3()
-                                                    .flex()
-                                                    .p_2()
-                                                    .child(
-                                                        div()
-                                                            .mr_2()
-                                                            .size_6()
-                                                            .child(Icon::new(IconName::Date, true)),
-                                                    )
-                                                    .child(date.clone()),
-                                            )
-                                            .child(
-                                                div()
-                                                    .w_full()
-                                                    .h_1_3()
-                                                    .flex()
-                                                    .p_2()
-                                                    .child(
-                                                        div()
-                                                            .mr_2()
-                                                            .size_6()
-                                                            .child(Icon::new(IconName::Cost, true)),
-                                                    )
-                                                    .child(format!("{} minutes", cost)),
-                                            ),
-                                    )
-                                    .child(
-                                        div()
-                                            .h_full()
-                                            .w_1_5()
-                                            .flex()
-                                            .justify_center()
-                                            .items_center()
-                                            .child(
-                                                div()
-                                                    .size(Self::INFO_HEIGHT * 3 - Self::PADDING * 4)
-                                                    .rounded_lg()
-                                                    .p(Self::PADDING)
-                                                    .hover(|this| this.bg(theme.hover_background))
-                                                    .child(Icon::new(IconName::Like, true))
-                                                    .on_mouse_down(MouseButton::Left, {
-                                                        let id = id.clone();
-                                                        let href = href.clone();
-                                                        let title = title.clone();
-                                                        let cover = cover.clone();
-                                                        let date = date.clone();
-                                                        move |_, cx| {
-                                                            cx.global::<DB>().like((
-                                                                &id, &href, &title, &cover, &date,
-                                                            ));
-                                                            cx.update_global::<like::State, ()>(
-                                                                |state, _| {
-                                                                    state
-                                                                        .machine_mut()
-                                                                        .load_page(1);
-                                                                },
-                                                            );
-                                                            cx.refresh();
-                                                        }
-                                                    }),
-                                            ),
-                                    ),
-                            )
-                            .children(new_samples.into_iter().map(move |sample| {
-                                div()
-                                    .w_full()
-                                    .h(Self::SAMPLE_HEIGHT)
-                                    .flex()
-                                    .children(sample)
-                            })),
+                            .on_mouse_down(MouseButton::Left, {
+                                move |_event, cx| {
+                                    let src = src.clone();
+                                    cx.update_global::<AppState, ()>(move |app_state, cx| {
+                                        app_state.open(src);
+                                        cx.refresh();
+                                    });
+                                }
+                            }),
                     )
                     .into_any()
             }
         });
 
         Self {
-            id,
+            title,
             scroll: Scroll::new(list_state),
         }
     }
@@ -214,7 +60,7 @@ impl Info {
     }
 
     pub fn title(&self) -> String {
-        self.id.clone()
+        self.title.clone()
     }
 }
 
@@ -235,11 +81,6 @@ impl RenderOnce for Info {
                         state.machine_mut().idle();
                         cx.refresh();
                     });
-                    return;
-                }
-
-                if x < Pixels(-40.0) {
-                    cx.open_url(&format!("https://missav.com/cn/search/{}", self.id));
                     return;
                 }
 
