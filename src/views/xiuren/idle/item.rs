@@ -44,7 +44,7 @@ impl RenderOnce for Item {
                     .h_full()
                     .rounded_lg()
                     .child(
-                        div().absolute().top_0().left_0().size_full().p_4().child(
+                        div().absolute().top_0().size_full().p_4().child(
                             div().size_full().child(
                                 img(self.cover)
                                     .rounded_md()
@@ -55,7 +55,7 @@ impl RenderOnce for Item {
                         ),
                     )
                     .child(
-                        div().absolute().top_0().left_0().size_full().p_4().child(
+                        div().absolute().top_0().size_full().p_4().child(
                             div()
                                 .size_full()
                                 .rounded_md()

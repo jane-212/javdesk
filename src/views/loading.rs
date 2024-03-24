@@ -27,8 +27,6 @@ impl RenderOnce for Loading {
                     .w_full()
                     .h(HEIGHT)
                     .absolute()
-                    .top_0()
-                    .left_0()
                     .border_l_1()
                     .border_color(theme.main)
                     .with_animation(
