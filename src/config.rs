@@ -31,6 +31,7 @@ impl Config {
         toml::from_str::<Self>(&config).unwrap_or_default()
     }
 
+    #[cfg(feature = "hide")]
     pub fn reload(cx: &mut WindowContext) {
         cx.update_global::<Self, _>(|config, _| {
             *config = Self::load_config();

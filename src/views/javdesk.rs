@@ -45,6 +45,7 @@ impl Javdesk {
         })
     }
 
+    #[cfg(feature = "hide")]
     pub fn reset(&mut self, cx: &mut WindowContext) {
         cx.update_model(&self.selected, |selected, _| {
             *selected = TabItem::Home;

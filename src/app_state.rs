@@ -11,6 +11,7 @@ impl AppState {
         cx.set_global(Self::new())
     }
 
+    #[cfg(feature = "hide")]
     pub fn reset(cx: &mut WindowContext) {
         cx.update_global::<Self, _>(|app_state, _| {
             app_state.clear();

@@ -23,6 +23,7 @@ impl Xiuren {
         cx.set_global(state);
     }
 
+    #[cfg(feature = "hide")]
     pub fn reset(cx: &mut WindowContext) {
         cx.update_global::<State, _>(|state, cx| {
             *state = State::new(cx);
