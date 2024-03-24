@@ -97,6 +97,7 @@ async fn image_transcode(param: web::Query<Param>, state: web::Data<State>) -> i
     let Ok(bytes) = state
         .client
         .get(&param.src)
+        .headers(headers(&param.t).clone())
         .send()
         .await
         .map(|res| res.bytes())
@@ -187,6 +188,18 @@ fn headers(t: &str) -> &'static HeaderMap {
                     HeaderValue::from_static("https://www.javbus.com/"),
                 );
                 headers.insert(header::HOST, HeaderValue::from_static("cloud.javcdn.cc"));
+                headers
+            })
+        }
+        "webp" => {
+            static CLIENT: OnceLock<HeaderMap> = OnceLock::new();
+            CLIENT.get_or_init(|| {
+                let mut headers = HeaderMap::new();
+                headers.insert(header::USER_AGENT, HeaderValue::from_static("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15"));
+                headers.insert(header::HOST, HeaderValue::from_static("xiuren.biz"));
+                headers.insert(header::ACCEPT, HeaderValue::from_static("image/webp,image/avif,image/jxl,image/heic,image/heic-sequence,video/*;q=0.8,image/png,image/svg+xml,image/*;q=0.8,*/*;q=0.5"));
+                headers.insert(header::ACCEPT_ENCODING, HeaderValue::from_static("gzip, deflate, br"));
+                headers.insert(header::REFERER, HeaderValue::from_static("https://xiuren.biz"));
                 headers
             })
         }
