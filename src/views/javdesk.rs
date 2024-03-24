@@ -78,20 +78,23 @@ impl Render for Javdesk {
             })
             .when_some(app_state.view_image().clone(), |this, src| {
                 let size = cx.viewport_size();
+                let scale = app_state.view_scale();
+                let pos = app_state.view_pos();
+                let width = (size.width - Self::IMAGE_PADDING * 2) * scale;
+                let height = (size.height - Self::IMAGE_PADDING * 2) * scale;
+
                 this.child(
                     img(src.clone())
-                        .w(size.width - Self::IMAGE_PADDING * 2)
+                        .w(width)
+                        .h(height)
                         .rounded_md()
                         .overflow_hidden()
+                        .mt(pos.y)
+                        .ml(pos.x)
                         .with_animation(
                             SharedString::from(src),
                             Animation::new(Duration::from_millis(500)).with_easing(ease_in_out),
-                            {
-                                let height = size.height;
-                                move |this, delta| {
-                                    this.h((height - Self::IMAGE_PADDING * 2) * delta)
-                                }
-                            },
+                            move |this, delta| this.h(height * delta),
                         ),
                 )
                 .on_mouse_down(MouseButton::Left, |_event, cx| {
@@ -99,6 +102,20 @@ impl Render for Javdesk {
                         app_state.close();
                         cx.refresh();
                     });
+                })
+                .on_scroll_wheel(move |ev, cx| {
+                    let delta = ev.delta.pixel_delta(Pixels(1.0));
+                    if ev.command {
+                        cx.update_global::<AppState, ()>(|app_state, cx| {
+                            app_state.scale(delta.y / 50.0);
+                            cx.refresh();
+                        });
+                    } else {
+                        cx.update_global::<AppState, ()>(|app_state, cx| {
+                            app_state.pos_move(delta.x, delta.y, size);
+                            cx.refresh();
+                        });
+                    }
                 })
             })
     }
