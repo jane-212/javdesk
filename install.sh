@@ -1,9 +1,9 @@
 echo "cargo bundle --release"
 cargo bundle --release
 
-APP_NAME="Javdesk"
+APP_NAME="Javdesk.app"
 APPLICATIONS_PATH="/Applications"
-APP_PATH="${APPLICATIONS_PATH}/${APP_NAME}.app"
+APP_PATH="${APPLICATIONS_PATH}/${APP_NAME}"
 
 if [[ -e ${APP_PATH} ]]
 then
@@ -13,4 +13,4 @@ then
 fi
 
 echo "move ${APP_NAME} to Applications"
-mv ./target/release/bundle/osx/${APP_NAME}.app ${APPLICATIONS_PATH}
+mv ./target/release/bundle/osx/${APP_NAME} ${APPLICATIONS_PATH}
