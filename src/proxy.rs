@@ -23,17 +23,18 @@ impl Proxy {
         if let Some(proxy) = proxy.and_then(|proxy| reqwest::Proxy::https(proxy).ok()) {
             client_builder = client_builder.proxy(proxy);
         }
-        let client = client_builder.build().expect("build proxy failed");
+        let client_proxy = client_builder.build().expect("build proxy failed");
+        let client = ClientBuilder::new().build().expect("build proxy failed");
 
         cx.background_executor()
             .spawn(async {
-                task::spawn(async { Self::run(client).await });
+                task::spawn(async { Self::run(client, client_proxy).await });
             })
             .detach();
     }
 
-    async fn run(client: Client) {
-        let state = Data::new(State::new(client));
+    async fn run(client: Client, client_proxy: Client) {
+        let state = Data::new(State::new(client, client_proxy));
 
         HttpServer::new(move || {
             App::new()
@@ -53,11 +54,15 @@ impl Proxy {
 
 struct State {
     client: Client,
+    client_proxy: Client,
 }
 
 impl State {
-    fn new(client: Client) -> Self {
-        Self { client }
+    fn new(client: Client, client_proxy: Client) -> Self {
+        Self {
+            client,
+            client_proxy,
+        }
     }
 }
 
@@ -70,7 +75,7 @@ struct Param {
 #[get("/image")]
 async fn image(param: web::Query<Param>, state: web::Data<State>) -> impl Responder {
     let Ok(bytes) = state
-        .client
+        .client_proxy
         .get(&param.src)
         .headers(headers(&param.t).clone())
         .send()
