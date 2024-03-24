@@ -80,7 +80,7 @@ impl Idle {
                 return;
             };
 
-            let Some(view) = item.select(&selectors().view).next().and_then(|view| {
+            let Some(view) = item.select(&selectors().view).next().map(|view| {
                 view.text()
                     .fold(String::new(), |mut view, text| {
                         let text = text.trim();
@@ -90,8 +90,6 @@ impl Idle {
                         view
                     })
                     .map(|view| view.trim().to_string())
-                    .parse()
-                    .ok()
             }) else {
                 return;
             };

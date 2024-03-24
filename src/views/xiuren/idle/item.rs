@@ -9,14 +9,14 @@ pub struct Item {
     href: String,
     cover: String,
     title: String,
-    view: i32,
+    view: String,
     date: String,
 }
 
 impl Item {
     const HEIGHT: Pixels = Pixels(400.0);
 
-    pub fn new(href: String, cover: String, title: String, view: i32, date: String) -> Self {
+    pub fn new(href: String, cover: String, title: String, view: String, date: String) -> Self {
         Self {
             href,
             cover,
@@ -89,7 +89,7 @@ impl RenderOnce for Item {
                                             .size_6()
                                             .child(Icon::new(IconName::View, true)),
                                     )
-                                    .child(self.view.to_string()),
+                                    .child(self.view),
                             )
                             .child(
                                 div()
