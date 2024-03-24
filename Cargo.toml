@@ -1,6 +1,6 @@
 [package]
 name = "javdesk"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 description = "A desktop application for javbus."
 
@@ -32,14 +32,9 @@ whoami = "1.5.1"
 [package.metadata.bundle]
 name = "Javdesk"
 identifier = "github.jane-212.javdesk"
-version = "1.0.0"
 icon = ["resources/AppIcon.icns"]
 copyright = "Copyright (c) Jane-212. All rights reserved."
 category = "Medical"
-short_description = "A desktop application for javbus."
-long_description = """
-Javdesk is a desktop of javbus.
-"""
 
 [profile.release]
 lto = "fat"
