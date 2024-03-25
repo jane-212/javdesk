@@ -37,9 +37,10 @@ copyright = "Copyright (c) Jane-212. All rights reserved."
 category = "Medical"
 
 [profile.release]
-lto = "fat"
+lto = true
 codegen-units = 1
 panic = "abort"
+strip = true
 
 [features]
 avatar = []
