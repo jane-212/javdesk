@@ -11,8 +11,8 @@ pub struct Tab {
 }
 
 impl Tab {
-    const WIDTH: Pixels = Pixels(70.0);
-    const PADDING: Pixels = Pixels(15.0);
+    const WIDTH: Pixels = Pixels(50.0);
+    const PADDING: Pixels = Pixels(5.0);
 
     pub fn new(selected: Model<TabItem>) -> Self {
         Self { selected }
@@ -39,11 +39,11 @@ impl Tab {
                 .mb_2()
                 .rounded_lg()
                 .hover(|s| {
-                    s.bg(if active {
-                        theme.background
+                    if !active {
+                        s.bg(theme.hover_background)
                     } else {
-                        theme.hover_background
-                    })
+                        s
+                    }
                 })
                 .on_mouse_down(MouseButton::Left, {
                     let selected = selected.clone();
@@ -80,8 +80,7 @@ impl Render for Tab {
             .flex()
             .justify_center()
             .items_center()
-            .border_r_1()
-            .border_color(theme.border)
+            .bg(theme.tab_background)
             .child(
                 div()
                     .w_full()

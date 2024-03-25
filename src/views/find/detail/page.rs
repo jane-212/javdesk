@@ -4,7 +4,7 @@ use super::State;
 use crate::theme::Theme;
 
 const SIZE: Pixels = Pixels(40.0);
-const PADDING: Pixels = Pixels(30.0);
+const PADDING: Pixels = Pixels(10.0);
 const MARGIN: Pixels = Pixels(8.0);
 
 #[derive(IntoElement, Clone)]
